@@ -17,7 +17,7 @@ final class RestaurantController
         if ($customer) $_SESSION['order_customer_phone'] = $customer['phone'];
 
         [$items,$total] = self::cart($db);
-        $products = $db->query("SELECT p.*,c.name AS category_name,c.color AS category_color FROM products p LEFT JOIN product_categories c ON c.id=p.category_id WHERE p.status='active' ORDER BY c.sort_order,c.name,p.name LIMIT 500")->fetchAll();
+        $products = $db->query("SELECT p.*,c.name AS category_name,c.color AS category_color FROM products p LEFT JOIN product_categories c ON c.name=p.product_type AND c.status='active' WHERE p.status='active' ORDER BY c.sort_order,c.name,p.name LIMIT 500")->fetchAll();
         $message = null; $error = null;
 
         try {
@@ -96,8 +96,9 @@ final class RestaurantController
     {
         $id=(int)($_POST['id']??0); $code=trim((string)($_POST['product_code']??'')); $name=PersianText::normalize($_POST['name']??'');
         if($id<1||$code===''||$name==='') throw new \RuntimeException('کد کالا و نام کالا الزامی است.');
-        $s=$db->prepare('UPDATE products SET product_code=?,name=?,price=?,unit=?,product_type=?,category_id=?,status=?,updated_at=NOW() WHERE id=?');
-        $s->execute([$code,$name,(float)($_POST['price']??0),PersianText::normalize($_POST['unit']??'')?:null,PersianText::normalize($_POST['product_type']??'')?:null,((int)($_POST['category_id']??0)?:null),($_POST['status']??'active')==='active'?'active':'inactive',$id]);
+        $type=PersianText::normalize($_POST['product_type']??'');
+        $s=$db->prepare('UPDATE products SET product_code=?,name=?,price=?,unit=?,product_type=?,status=?,updated_at=NOW() WHERE id=?');
+        $s->execute([$code,$name,(float)($_POST['price']??0),PersianText::normalize($_POST['unit']??'')?:null,$type?:null,($_POST['status']??'active')==='active'?'active':'inactive',$id]);
     }
 
     public static function bulkDeleteProducts(PDO $db): int
@@ -122,8 +123,9 @@ final class RestaurantController
     {
         $code=trim((string)($_POST['product_code']??'')); $name=PersianText::normalize($_POST['name']??'');
         if($code===''||$name==='') throw new \RuntimeException('کد کالا و نام کالا الزامی است.');
-        $s=$db->prepare('INSERT INTO products(product_code,name,price,unit,product_type,category_id,status,created_at) VALUES(?,?,?,?,?,?,?,NOW())');
-        $s->execute([$code,$name,(float)($_POST['price']??0),PersianText::normalize($_POST['unit']??'')?:null,PersianText::normalize($_POST['product_type']??'')?:null,((int)($_POST['category_id']??0)?:null),($_POST['status']??'active')==='active'?'active':'inactive']);
+        $type=PersianText::normalize($_POST['product_type']??'');
+        $s=$db->prepare('INSERT INTO products(product_code,name,price,unit,product_type,status,created_at) VALUES(?,?,?,?,?,?,NOW())');
+        $s->execute([$code,$name,(float)($_POST['price']??0),PersianText::normalize($_POST['unit']??'')?:null,$type?:null,($_POST['status']??'active')==='active'?'active':'inactive']);
     }
 
     public static function addItem(): void
