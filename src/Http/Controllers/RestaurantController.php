@@ -24,7 +24,7 @@ final class RestaurantController
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $action = $_POST['action'] ?? '';
                 if ($action === 'add_customer_order') { self::addCustomerFromOrder($db); $message='مشتری با موفقیت ثبت و انتخاب شد.'; }
-                elseif ($action === 'add_item') { self::addItem(); }
+                elseif ($action === 'add_item') { if (!$customer) throw new \RuntimeException('ابتدا مشتری را انتخاب کنید، سپس محصول را به پیش‌فاکتور اضافه کنید.'); self::addItem(); }
                 elseif ($action === 'remove_item') { self::removeItem(); }
                 elseif ($action === 'clear_cart') { self::clearCart(); }
                 elseif ($action === 'finalize') {
@@ -99,6 +99,18 @@ final class RestaurantController
         $type=PersianText::normalize($_POST['product_type']??'');
         $s=$db->prepare('UPDATE products SET product_code=?,name=?,price=?,unit=?,product_type=?,status=?,updated_at=NOW() WHERE id=?');
         $s->execute([$code,$name,(float)($_POST['price']??0),PersianText::normalize($_POST['unit']??'')?:null,$type?:null,($_POST['status']??'active')==='active'?'active':'inactive',$id]);
+    }
+
+    public static function bulkAssignProductType(PDO $db): int
+    {
+        $ids=array_values(array_filter(array_map('intval',(array)($_POST['product_ids']??[])),fn($id)=>$id>0));
+        $type=PersianText::normalize($_POST['target_product_type']??'');
+        if(!$ids) throw new \RuntimeException('حداقل یک محصول را انتخاب کنید.');
+        if($type==='') throw new \RuntimeException('نوع مقصد را انتخاب کنید.');
+        $s=$db->prepare('UPDATE products SET product_type=?,updated_at=NOW() WHERE id=?');
+        $count=0;
+        foreach($ids as $id){$s->execute([$type,$id]);$count+=(int)$s->rowCount();}
+        return $count;
     }
 
     public static function bulkDeleteProducts(PDO $db): int
