@@ -175,15 +175,18 @@ final class CsvController
 
     private static function decode(string $value): string
     {
+        // CSV input is required to be UTF-8. No legacy code-page conversion is
+        // performed because mb_convert_encoding() source encodings such as
+        // CP1256/Windows-1256 are not required for this application.
         if (str_starts_with($value, "\xFF\xFE") || str_starts_with($value, "\xFE\xFF")) {
-            $converted = @mb_convert_encoding($value, 'UTF-8', 'UTF-16');
-            if ($converted !== false) return $converted;
+            throw new \RuntimeException('فایل CSV باید با UTF-8 ذخیره شده باشد؛ فایل UTF-16 قابل قبول نیست.');
         }
 
-        if (preg_match('//u', $value) === 1) return $value;
+        if (preg_match('//u', $value) !== 1) {
+            throw new \RuntimeException('فایل CSV دارای Encoding نامعتبر است. فایل را با UTF-8 ذخیره و دوباره بارگذاری کنید.');
+        }
 
-        $converted = @mb_convert_encoding($value, 'UTF-8', 'CP1256, ISO-8859-6, CP1252');
-        return $converted !== false ? $converted : $value;
+        return $value;
     }
 
     private static function header(array $h): array
