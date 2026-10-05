@@ -22,7 +22,8 @@ final class RestaurantController
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $action = $_POST['action'] ?? '';
-                if ($action === 'add_customer_order') { self::addCustomerFromOrder($db); $message='مشتری با موفقیت ثبت و انتخاب شد.'; }\n                elseif ($action === 'add_item') { self::addItem(); }
+                if ($action === 'add_customer_order') { self::addCustomerFromOrder($db); $message='مشتری با موفقیت ثبت و انتخاب شد.'; }
+                elseif ($action === 'add_item') { self::addItem(); }
                 elseif ($action === 'remove_item') { self::removeItem(); }
                 elseif ($action === 'clear_cart') { self::clearCart(); }
                 elseif ($action === 'finalize') {
