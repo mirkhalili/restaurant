@@ -43,7 +43,7 @@ final class CrudController
                 }
             }
         } catch(\Throwable $e){$error=self::friendly($e);}
-        $rows=$db->query('SELECT p.*,c.name AS category_name,c.color AS category_color FROM products p LEFT JOIN product_categories c ON c.id=p.category_id ORDER BY p.id DESC LIMIT 300')->fetchAll();
+        $rows=$db->query('SELECT p.*,c.name AS category_name,c.color AS category_color FROM products p LEFT JOIN product_categories c ON c.name=p.product_type ORDER BY p.id DESC LIMIT 300')->fetchAll();
         $edit=null;
         if(isset($_GET['edit'])) {
             $s=$db->prepare('SELECT * FROM products WHERE id=? LIMIT 1');$s->execute([(int)$_GET['edit']]);$edit=$s->fetch()?:null;
