@@ -42,12 +42,14 @@ final class RestaurantController
         return compact('products','items','total','customer','phone','message','error');
     }
 
-    public static function customerSearch(PDO $db, string $phone): ?array
+    public static function customerSearch(PDO $db, string $query): ?array
     {
-        $phone = self::normalizeDigits($phone);
-        if ($phone === '') return null;
-        $s=$db->prepare('SELECT * FROM customers WHERE phone = ? LIMIT 1');
-        $s->execute([$phone]);
+        $query = trim($query);
+        if ($query === '') return null;
+        $phone = self::normalizeDigits($query);
+        $s=$db->prepare('SELECT * FROM customers WHERE phone = ? OR name LIKE ? OR first_name LIKE ? OR last_name LIKE ? ORDER BY (phone = ?) DESC, id DESC LIMIT 1');
+        $like='%'.$query.'%';
+        $s->execute([$phone,$like,$like,$like,$phone]);
         return $s->fetch() ?: null;
     }
 
