@@ -99,13 +99,14 @@ final class CsvController
                 $status = in_array($status, ['0', 'false', 'inactive', 'غیرفعال'], true) ? 'inactive' : 'active';
 
                 $s = $db->prepare(
-                    'INSERT INTO products(product_code,name,price,unit,product_type,status,created_at)
-                     VALUES(?,?,?,?,?,?,NOW())
+                    'INSERT INTO products(product_code,name,price,unit,product_type,category_id,status,created_at)
+                     VALUES(?,?,?,?,?,?,?,NOW())
                      ON DUPLICATE KEY UPDATE
                      name=VALUES(name),
                      price=VALUES(price),
                      unit=VALUES(unit),
                      product_type=VALUES(product_type),
+                     category_id=VALUES(category_id),
                      status=VALUES(status),
                      updated_at=NOW()'
                 );
@@ -115,7 +116,7 @@ final class CsvController
                     $name,
                     $price,
                     self::get($r, $map, ['واحد', 'unit']) ?: null,
-                    self::get($r, $map, ['نوع کالا', 'نوع محصول', 'product_type']) ?: null,
+                    self::categoryId($db, self::get($r, $map, ['دسته‌بندی','دسته بندی','category','نوع کالا', 'نوع محصول', 'product_type'])),
                     $status
                 ]);
                 $n++;
@@ -129,6 +130,13 @@ final class CsvController
         }
 
         return $n;
+    }
+
+    private static function categoryId(PDO $db, string $name): ?int
+    {
+        if($name==='') return null;
+        $s=$db->prepare('SELECT id FROM product_categories WHERE name=? LIMIT 1');$s->execute([PersianText::normalize($name)]);
+        $id=$s->fetchColumn(); return $id ? (int)$id : null;
     }
 
     private static function open(array $f)
