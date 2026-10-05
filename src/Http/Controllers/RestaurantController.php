@@ -22,7 +22,7 @@ final class RestaurantController
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $action = $_POST['action'] ?? '';
-                if ($action === 'add_item') { self::addItem(); }
+                if ($action === 'add_customer_order') { self::addCustomerFromOrder($db); $message='مشتری با موفقیت ثبت و انتخاب شد.'; }\n                elseif ($action === 'add_item') { self::addItem(); }
                 elseif ($action === 'remove_item') { self::removeItem(); }
                 elseif ($action === 'clear_cart') { self::clearCart(); }
                 elseif ($action === 'finalize') {
@@ -65,6 +65,41 @@ final class RestaurantController
             trim((string)($_POST['address']??''))?:null,
             PersianDate::toGregorian($_POST['birth_date']??'')
         ]);
+    }
+
+    public static function updateCustomer(PDO $db): void
+    {
+        $id=(int)($_POST['id']??0); $phone=self::normalizeDigits($_POST['phone']??'');
+        $first=trim((string)($_POST['first_name']??'')); $last=trim((string)($_POST['last_name']??''));
+        if($id<1||$first===''||$last===''||$phone==='') throw new \RuntimeException('نام، نام خانوادگی و شماره تلفن الزامی است.');
+        $s=$db->prepare('UPDATE customers SET subscription_code=?,first_name=?,last_name=?,name=?,phone=?,mobile=?,membership_date=?,address=?,birth_date=?,updated_at=NOW() WHERE id=?');
+        $s->execute([trim((string)($_POST['subscription_code']??''))?:null,$first,$last,trim($first.' '.$last),$phone,self::normalizeDigits($_POST['mobile']??'')?:null,P persianDate::toGregorian($_POST['membership_date']??''),trim((string)($_POST['address']??''))?:null,P persianDate::toGregorian($_POST['birth_date']??''),$id]);
+    }
+
+    public static function deleteCustomer(PDO $db): void
+    {
+        $id=(int)($_POST['id']??0); if($id<1) throw new \RuntimeException('مشتری نامعتبر است.');
+        $s=$db->prepare('DELETE FROM customers WHERE id=?'); $s->execute([$id]);
+    }
+
+    public static function addCustomerFromOrder(PDO $db): void
+    {
+        self::addCustomer($db);
+        $_SESSION['order_customer_phone']=self::normalizeDigits($_POST['phone']??'');
+    }
+
+    public static function updateProduct(PDO $db): void
+    {
+        $id=(int)($_POST['id']??0); $code=trim((string)($_POST['product_code']??'')); $name=trim((string)($_POST['name']??''));
+        if($id<1||$code===''||$name==='') throw new \RuntimeException('کد کالا و نام کالا الزامی است.');
+        $s=$db->prepare('UPDATE products SET product_code=?,name=?,price=?,unit=?,product_type=?,status=?,updated_at=NOW() WHERE id=?');
+        $s->execute([$code,$name,(float)($_POST['price']??0),trim((string)($_POST['unit']??''))?:null,trim((string)($_POST['product_type']??''))?:null,($_POST['status']??'active')==='active'?'active':'inactive',$id]);
+    }
+
+    public static function deleteProduct(PDO $db): void
+    {
+        $id=(int)($_POST['id']??0); if($id<1) throw new \RuntimeException('محصول نامعتبر است.');
+        $s=$db->prepare('DELETE FROM products WHERE id=?'); $s->execute([$id]);
     }
 
     public static function addProduct(PDO $db): void
