@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use PDO;
 use App\Support\PersianDate;
+use App\Support\PersianText;
 
 final class CsvController
 {
@@ -213,7 +214,7 @@ final class CsvController
     {
         foreach ($names as $n) {
             $k = self::normalizeHeader($n);
-            if (isset($m[$k])) return trim((string) ($r[$m[$k]] ?? ''));
+            if (isset($m[$k])) return PersianText::normalize(trim((string) ($r[$m[$k]] ?? '')));
         }
         return '';
     }
