@@ -1,34 +1,15 @@
-# سامانه اتوماسیون رستوران
+# مستندات سامانه اتوماسیون رستوران
 
-این پوشه مرجع محصول، فرآیندها، نقش‌ها، قوانین کسب‌وکار، سخت‌افزار، چاپ، گزارش‌ها، امنیت و معماری سامانه است.
+این پوشه مرجع محصول، فرآیندها، نقش‌ها، قوانین کسب‌وکار، معماری، امنیت و UI/UX است.
 
-## اهداف
-- مدیریت فروش حضوری، تلفنی، بیرون‌بر و سفارش میز
-- مدیریت مشتری، غذا، منو، میز، صندوق، انبار و خرید
-- پشتیبانی از چند صندوق، چند فیش‌پرینتر و Caller ID
-- کنترل دسترسی مبتنی بر نقش و مجوز
-- گزارش‌های مالی و مدیریتی
-- بارگذاری و دانلود فایل در بخش‌های مجاز
-- ثبت کامل عملیات حساس و ردیابی تغییرات
-- معماری آماده توسعه چند شعبه
+## مرجع UI
+- [15-ui-ux](15-ui-ux.md)
+- [21-ui-design-system](21-ui-design-system.md)
+- [22-navigation-information-architecture](22-navigation-information-architecture.md)
+- [23-ui-screen-specifications](23-ui-screen-specifications.md)
 
 ## فهرست مستندات
-1. 01-product-requirements
-2. 02-roles-permissions
-3. 03-business-processes
-4. 04-modules
-5. 05-orders-billing
-6. 06-inventory-purchasing
-7. 07-printing-devices
-8. 08-customers-caller-id
-9. 09-reports
-10. 10-settings
-11. 11-security-audit
-12. 12-files-import-export
-13. 13-data-model
-14. 14-architecture
-15. 15-ui-ux
-16. 16-non-functional-requirements
-17. 17-roadmap
+01-product-requirements · 02-roles-permissions · 03-business-processes · 04-modules · 05-orders-billing · 06-inventory-purchasing · 07-printing-devices · 08-customers-caller-id · 09-reports · 10-settings · 11-security-audit · 12-files-import-export · 13-data-model · 14-architecture · 15-ui-ux · 16-non-functional-requirements · 17-roadmap · 18-implementation · 19-versioning · QAVNS · 21-ui-design-system · 22-navigation-information-architecture · 23-ui-screen-specifications
 
-اصل مهم: عملیات حساس مانند حذف فاکتور، ابطال پرداخت، برگشت وجه، تغییر قیمت و اصلاح موجودی فقط با مجوز و ثبت Audit انجام شود.
+## اصل مهم
+عملیات حساس فقط با Permission و Audit انجام شود. UI هرگز جایگزین کنترل Backend نیست.
