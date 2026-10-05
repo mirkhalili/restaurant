@@ -11,7 +11,7 @@ require dirname(__DIR__) . '/src/Http/Controllers/CrudController.php';
 
 $config = require dirname(__DIR__) . '/config/config.php';
 $db = App\Core\Database::get($config);
-App\Core\Auth::start();
+App\Core\Auth::start($config);
 
 $page = App\Core\Router::page();
 
