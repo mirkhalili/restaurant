@@ -13,6 +13,7 @@ require __DIR__ . '/src/Http/Controllers/CsvController.php';
 require __DIR__ . '/src/Http/Controllers/RestaurantController.php';
 require __DIR__ . '/src/Http/Controllers/CrudController.php';
 require __DIR__ . '/src/Http/Controllers/SettingsController.php';
+require __DIR__ . '/src/Http/Controllers/UsersController.php';
 
 $config = require __DIR__ . '/config/config.php';
 $db = App\Core\Database::get($config);
@@ -67,6 +68,18 @@ if ($page === 'products') {
 if ($page === 'settings') {
     $data=App\Http\Controllers\SettingsController::categories($db); $title='تنظیمات'; extract($data);
     ob_start(); require __DIR__.'/views/settings.php'; $content=ob_get_clean(); require __DIR__.'/views/layout.php'; exit;
+}
+
+if ($page === 'users') {
+    try { $data=App\Http\Controllers\UsersController::users($db); }
+    catch (\Throwable $e) { $data=['rows'=>[],'roles'=>[],'edit'=>null,'message'=>null,'error'=>$e->getMessage()]; }
+    $title='کاربران و دسترسی‌ها'; extract($data);
+    ob_start(); require __DIR__.'/views/users.php'; $content=ob_get_clean(); require __DIR__.'/views/layout.php'; exit;
+}
+
+if ($page === 'profile') {
+    $data=App\Http\Controllers\UsersController::profile($db); $title='پروفایل من'; extract($data);
+    ob_start(); require __DIR__.'/views/profile.php'; $content=ob_get_clean(); require __DIR__.'/views/layout.php'; exit;
 }
 
 if (in_array($page,['inventory','kitchen','reports','users','audit'],true)) {
