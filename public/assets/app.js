@@ -6,5 +6,5 @@ const open=()=>{sidebar?.classList.add('open');backdrop?.classList.add('show')};
 document.querySelector('[data-sidebar-open]')?.addEventListener('click',open);backdrop?.addEventListener('click',close);
 document.querySelector('[data-sidebar-collapse]')?.addEventListener('click',()=>document.body.classList.toggle('sidebar-collapsed'));
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.querySelector('[data-global-search]')?.focus()}if(e.key==='Escape')close()});
-document.querySelector('[data-global-search]')?.addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(row=>row.hidden=q && !row.textContent.toLowerCase().includes(q))});
+const filterRows=q=>document.querySelectorAll('tbody tr').forEach(row=>{row.hidden=!!q&&!row.textContent.toLowerCase().includes(q)});document.querySelector('[data-global-search]')?.addEventListener('input',e=>filterRows(e.target.value.trim().toLowerCase()));document.querySelector('[data-global-search-local]')?.addEventListener('input',e=>filterRows(e.target.value.trim().toLowerCase()));
 })();
