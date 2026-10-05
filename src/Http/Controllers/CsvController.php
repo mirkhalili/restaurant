@@ -182,7 +182,7 @@ final class CsvController
 
         if (preg_match('//u', $value) === 1) return $value;
 
-        $converted = @mb_convert_encoding($value, 'UTF-8', 'Windows-1256, ISO-8859-6, CP1252');
+        $converted = @mb_convert_encoding($value, 'UTF-8', 'CP1256, ISO-8859-6, CP1252');
         return $converted !== false ? $converted : $value;
     }
 
