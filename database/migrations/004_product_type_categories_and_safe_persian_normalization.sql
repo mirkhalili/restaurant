@@ -98,6 +98,16 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 SET FOREIGN_KEY_CHECKS=1;
 
+-- ایندکس نوع محصول برای جستجو و نمایش POS.
+SET @has_type_index := (
+  SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='products' AND INDEX_NAME='idx_products_type'
+);
+SET @sql := IF(@has_type_index=0,
+  'ALTER TABLE products ADD INDEX idx_products_type(product_type)',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 -- گزارش کنترل پس از اجرا:
 SELECT
   (SELECT COUNT(*) FROM customers WHERE first_name LIKE '%ي%' OR last_name LIKE '%ي%' OR name LIKE '%ي%' OR address LIKE '%ي%' OR notes LIKE '%ي%') AS customers_with_arabic_ye,
