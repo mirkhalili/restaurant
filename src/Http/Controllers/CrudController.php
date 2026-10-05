@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use PDO;
+use App\Support\PersianText;
 
 final class CrudController
 {
@@ -37,16 +38,18 @@ final class CrudController
                     case 'create_product': RestaurantController::addProduct($db); $message='محصول با موفقیت ثبت شد.'; break;
                     case 'update_product': RestaurantController::updateProduct($db); $message='محصول ویرایش شد.'; break;
                     case 'delete_product': RestaurantController::deleteProduct($db); $message='محصول حذف شد.'; break;
+                    case 'bulk_delete_products': $message=RestaurantController::bulkDeleteProducts($db).' محصول حذف شد.'; break;
                     case 'import_products_csv': $message=CsvController::products($db,$_FILES['csv']??[]).' محصول وارد/به‌روزرسانی شد.'; break;
                 }
             }
         } catch(\Throwable $e){$error=self::friendly($e);}
-        $rows=$db->query('SELECT * FROM products ORDER BY id DESC LIMIT 300')->fetchAll();
+        $rows=$db->query('SELECT p.*,c.name AS category_name,c.color AS category_color FROM products p LEFT JOIN product_categories c ON c.id=p.category_id ORDER BY p.id DESC LIMIT 300')->fetchAll();
         $edit=null;
         if(isset($_GET['edit'])) {
             $s=$db->prepare('SELECT * FROM products WHERE id=? LIMIT 1');$s->execute([(int)$_GET['edit']]);$edit=$s->fetch()?:null;
         }
-        return compact('rows','message','error','edit');
+        $categories=$db->query("SELECT * FROM product_categories WHERE status='active' ORDER BY sort_order,name")->fetchAll();
+        return compact('rows','message','error','edit','categories');
     }
 
     public static function orders(PDO $db): array
