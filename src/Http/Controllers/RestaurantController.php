@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Support\PersianDate;
+use App\Support\PersianText;
 use PDO;
 
 final class RestaurantController
@@ -16,7 +17,7 @@ final class RestaurantController
         if ($customer) $_SESSION['order_customer_phone'] = $customer['phone'];
 
         [$items,$total] = self::cart($db);
-        $products = $db->query("SELECT * FROM products WHERE status='active' ORDER BY name ASC LIMIT 500")->fetchAll();
+        $products = $db->query("SELECT p.*,c.name AS category_name,c.color AS category_color FROM products p LEFT JOIN product_categories c ON c.id=p.category_id WHERE p.status='active' ORDER BY c.sort_order,c.name,p.name LIMIT 500")->fetchAll();
         $message = null; $error = null;
 
         try {
@@ -45,7 +46,7 @@ final class RestaurantController
 
     public static function customerSearch(PDO $db, string $query): ?array
     {
-        $query = trim($query);
+        $query = PersianText::normalize($query);
         if ($query === '') return null;
         $phone = self::normalizeDigits($query);
         $s=$db->prepare('SELECT * FROM customers WHERE phone = ? OR name LIKE ? OR first_name LIKE ? OR last_name LIKE ? ORDER BY (phone = ?) DESC, id DESC LIMIT 1');
@@ -57,15 +58,15 @@ final class RestaurantController
     public static function addCustomer(PDO $db): void
     {
         $phone=self::normalizeDigits($_POST['phone']??'');
-        $first=trim((string)($_POST['first_name']??''));
-        $last=trim((string)($_POST['last_name']??''));
+        $first=PersianText::normalize($_POST['first_name']??'');
+        $last=PersianText::normalize($_POST['last_name']??'');
         if($first===''||$last===''||$phone==='') throw new \RuntimeException('نام، نام خانوادگی و شماره تلفن الزامی است.');
         $s=$db->prepare('INSERT INTO customers(subscription_code,first_name,last_name,name,phone,mobile,membership_date,address,birth_date,created_at) VALUES(?,?,?,?,?,?,?,?,?,NOW())');
         $s->execute([
-            trim((string)($_POST['subscription_code']??''))?:null,$first,$last,trim($first.' '.$last),$phone,
+            PersianText::normalize($_POST['subscription_code']??'')?:null,$first,$last,trim($first.' '.$last),$phone,
             self::normalizeDigits($_POST['mobile']??'')?:null,
             PersianDate::toGregorian($_POST['membership_date']??''),
-            trim((string)($_POST['address']??''))?:null,
+            PersianText::normalize($_POST['address']??'')?:null,
             PersianDate::toGregorian($_POST['birth_date']??'')
         ]);
     }
@@ -73,10 +74,10 @@ final class RestaurantController
     public static function updateCustomer(PDO $db): void
     {
         $id=(int)($_POST['id']??0); $phone=self::normalizeDigits($_POST['phone']??'');
-        $first=trim((string)($_POST['first_name']??'')); $last=trim((string)($_POST['last_name']??''));
+        $first=PersianText::normalize($_POST['first_name']??''); $last=PersianText::normalize($_POST['last_name']??'');
         if($id<1||$first===''||$last===''||$phone==='') throw new \RuntimeException('نام، نام خانوادگی و شماره تلفن الزامی است.');
         $s=$db->prepare('UPDATE customers SET subscription_code=?,first_name=?,last_name=?,name=?,phone=?,mobile=?,membership_date=?,address=?,birth_date=?,updated_at=NOW() WHERE id=?');
-        $s->execute([trim((string)($_POST['subscription_code']??''))?:null,$first,$last,trim($first.' '.$last),$phone,self::normalizeDigits($_POST['mobile']??'')?:null,PersianDate::toGregorian($_POST['membership_date']??''),trim((string)($_POST['address']??''))?:null,PersianDate::toGregorian($_POST['birth_date']??''),$id]);
+        $s->execute([PersianText::normalize($_POST['subscription_code']??'')?:null,$first,$last,trim($first.' '.$last),$phone,self::normalizeDigits($_POST['mobile']??'')?:null,PersianDate::toGregorian($_POST['membership_date']??''),PersianText::normalize($_POST['address']??'')?:null,PersianDate::toGregorian($_POST['birth_date']??''),$id]);
     }
 
     public static function deleteCustomer(PDO $db): void
@@ -93,10 +94,10 @@ final class RestaurantController
 
     public static function updateProduct(PDO $db): void
     {
-        $id=(int)($_POST['id']??0); $code=trim((string)($_POST['product_code']??'')); $name=trim((string)($_POST['name']??''));
+        $id=(int)($_POST['id']??0); $code=trim((string)($_POST['product_code']??'')); $name=PersianText::normalize($_POST['name']??'');
         if($id<1||$code===''||$name==='') throw new \RuntimeException('کد کالا و نام کالا الزامی است.');
-        $s=$db->prepare('UPDATE products SET product_code=?,name=?,price=?,unit=?,product_type=?,status=?,updated_at=NOW() WHERE id=?');
-        $s->execute([$code,$name,(float)($_POST['price']??0),trim((string)($_POST['unit']??''))?:null,trim((string)($_POST['product_type']??''))?:null,($_POST['status']??'active')==='active'?'active':'inactive',$id]);
+        $s=$db->prepare('UPDATE products SET product_code=?,name=?,price=?,unit=?,product_type=?,category_id=?,status=?,updated_at=NOW() WHERE id=?');
+        $s->execute([$code,$name,(float)($_POST['price']??0),PersianText::normalize($_POST['unit']??'')?:null,PersianText::normalize($_POST['product_type']??'')?:null,((int)($_POST['category_id']??0)?:null),($_POST['status']??'active')==='active'?'active':'inactive',$id]);
     }
 
     public static function deleteProduct(PDO $db): void
@@ -107,10 +108,10 @@ final class RestaurantController
 
     public static function addProduct(PDO $db): void
     {
-        $code=trim((string)($_POST['product_code']??'')); $name=trim((string)($_POST['name']??''));
+        $code=trim((string)($_POST['product_code']??'')); $name=PersianText::normalize($_POST['name']??'');
         if($code===''||$name==='') throw new \RuntimeException('کد کالا و نام کالا الزامی است.');
-        $s=$db->prepare('INSERT INTO products(product_code,name,price,unit,product_type,status,created_at) VALUES(?,?,?,?,?,?,NOW())');
-        $s->execute([$code,$name,(float)($_POST['price']??0),trim((string)($_POST['unit']??''))?:null,trim((string)($_POST['product_type']??''))?:null,($_POST['status']??'active')==='active'?'active':'inactive']);
+        $s=$db->prepare('INSERT INTO products(product_code,name,price,unit,product_type,category_id,status,created_at) VALUES(?,?,?,?,?,?,?,NOW())');
+        $s->execute([$code,$name,(float)($_POST['price']??0),PersianText::normalize($_POST['unit']??'')?:null,PersianText::normalize($_POST['product_type']??'')?:null,((int)($_POST['category_id']??0)?:null),($_POST['status']??'active')==='active'?'active':'inactive']);
     }
 
     public static function addItem(): void
