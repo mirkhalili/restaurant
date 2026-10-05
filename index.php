@@ -6,11 +6,13 @@ require __DIR__ . '/src/Core/Auth.php';
 require __DIR__ . '/src/Core/Router.php';
 require __DIR__ . '/src/Support/Response.php';
 require __DIR__ . '/src/Support/PersianDate.php';
+require __DIR__ . '/src/Support/PersianText.php';
 require __DIR__ . '/src/Http/Controllers/AuthController.php';
 require __DIR__ . '/src/Http/Controllers/DashboardController.php';
 require __DIR__ . '/src/Http/Controllers/CsvController.php';
 require __DIR__ . '/src/Http/Controllers/RestaurantController.php';
 require __DIR__ . '/src/Http/Controllers/CrudController.php';
+require __DIR__ . '/src/Http/Controllers/SettingsController.php';
 
 $config = require __DIR__ . '/config/config.php';
 $db = App\Core\Database::get($config);
@@ -21,6 +23,11 @@ $page = App\Core\Router::page();
 if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/api/v1/')) {
     $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     if ($path === '/api/v1/health') App\Support\Response::json(['status'=>'ok','version'=>trim((string)file_get_contents(__DIR__.'/VERSION'))]);
+    if ($path === '/api/v1/customers/search') {
+        $q=(string)($_GET['q']??''); $items=[];
+        if(trim($q)!=='') { $like='%'.App\Support\PersianText::normalize($q).'%'; $phone=App\Support\PersianDate::latinDigits(trim($q)); $s=$db->prepare('SELECT id,name,phone,mobile,subscription_code,address FROM customers WHERE phone LIKE ? OR name LIKE ? OR first_name LIKE ? OR last_name LIKE ? ORDER BY (phone=?) DESC,id DESC LIMIT 8'); $s->execute(['%'.$phone.'%',$like,$like,$like,$phone]); $items=$s->fetchAll(); }
+        App\Support\Response::json(['items'=>$items]);
+    }
     App\Support\Response::json(['error'=>'Not Found'],404);
 }
 
@@ -57,7 +64,12 @@ if ($page === 'products') {
     require __DIR__.'/views/layout.php'; exit;
 }
 
-if (in_array($page,['inventory','kitchen','reports','users','settings','audit'],true)) {
+if ($page === 'settings') {
+    $data=App\Http\Controllers\SettingsController::categories($db); $title='تنظیمات'; extract($data);
+    ob_start(); require __DIR__.'/views/settings.php'; $content=ob_get_clean(); require __DIR__.'/views/layout.php'; exit;
+}
+
+if (in_array($page,['inventory','kitchen','reports','users','audit'],true)) {
     ob_start(); require __DIR__.'/views/module-placeholder.php'; $content=ob_get_clean();
     $title='ماژول'; require __DIR__.'/views/layout.php'; exit;
 } else {
