@@ -100,6 +100,18 @@ final class RestaurantController
         $s->execute([$code,$name,(float)($_POST['price']??0),PersianText::normalize($_POST['unit']??'')?:null,PersianText::normalize($_POST['product_type']??'')?:null,((int)($_POST['category_id']??0)?:null),($_POST['status']??'active')==='active'?'active':'inactive',$id]);
     }
 
+    public static function bulkDeleteProducts(PDO $db): int
+    {
+        $ids=array_values(array_filter(array_map('intval',(array)($_POST['product_ids']??[])),fn($id)=>$id>0));
+        if(!$ids) throw new \RuntimeException('حداقل یک محصول را انتخاب کنید.');
+        $deleted=0;
+        foreach($ids as $id){
+            try{$s=$db->prepare('DELETE FROM products WHERE id=?');$s->execute([$id]);$deleted+=(int)$s->rowCount();}
+            catch(\Throwable $e){ if(!str_contains(strtolower($e->getMessage()),'foreign key') && !str_contains($e->getMessage(),'Cannot delete')) throw $e; }
+        }
+        return $deleted;
+    }
+
     public static function deleteProduct(PDO $db): void
     {
         $id=(int)($_POST['id']??0); if($id<1) throw new \RuntimeException('محصول نامعتبر است.');
