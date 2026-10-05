@@ -1,14 +1,21 @@
 # مستند پیاده‌سازی
-با توجه به اینکه مستندات محصول فناوری اجرایی مشخصی تعیین نکرده‌اند، این نسخه با PHP 8.3+، MySQL 8 و PDO به‌صورت Modular Monolith پیاده‌سازی شده است.
 
-## پوشش نسخه 001.1.0.0
-- احراز هویت Session و RBAC پایه
-- داشبورد، مشتریان، محصولات و سفارش‌ها
-- اسکیمای هویت، شعبه، فروش، فاکتور، پرداخت و Audit
-- API health
-- Docker
-- Smoke test
-- UI راست‌چین و مناسب POS
+## نسخه هدف
+002.0.0.0 — بازطراحی بنیادی UI/UX و App Shell.
 
-## محدودیت‌های آگاهانه
-Caller ID، KDS، چاپگرهای فیزیکی، Recipe/انبار پیشرفته، خرید، گزارش PDF/Excel، Backup/Restore و Worker در مدل و roadmap تعریف شده‌اند و در نسخه‌های بعدی عملیاتی می‌شوند؛ ادعای تست سخت‌افزار بدون محیط واقعی انجام نمی‌شود.
+## Stack
+PHP 8.3+، MySQL 8، PDO، HTML/CSS/Vanilla JS، Modular Monolith.
+
+## UI Architecture
+- Shared App Shell در `views/layout.php`
+- Navigation داده‌محور در Sidebar
+- Theme با CSS custom properties
+- Progressive Enhancement با Vanilla JS
+- صفحات فعلی: Dashboard، Orders، Customers، Products
+- ساختار UI برای Inventory/Reports/Settings در Navigation آماده است و منطق Backend آن‌ها باید مطابق roadmap توسعه یابد.
+
+## الهام طراحی
+الگوهای عمومی Ever Gauzy شامل Sidebar/Header، Layoutهای چندستونه، داشبورد ویجتی، Breadcrumb، Theme و Table-oriented management به‌عنوان مرجع UX مطالعه شده‌اند؛ کد و ظاهر اختصاصی آن پروژه کپی نشده است.
+
+## تست
+پس از هر تغییر UI: PHP syntax، smoke test، responsive layout و keyboard navigation بررسی شود.
