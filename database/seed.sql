@@ -44,7 +44,7 @@ WHERE NOT EXISTS (SELECT 1 FROM products WHERE name='نوشابه');
 
 INSERT INTO users (role_id,email,password_hash,status,created_at)
 SELECT id,'admin@example.com',
-'$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llCjGxq1P8r6Q2q5QJ2Oe',
+'$2y$12$McvX49hKrZ3OpYWMj/t53.q0d3o8JJZzYC55CI4ztuoaiVCv9QN2q',
 'active',NOW()
 FROM roles
 WHERE name='مدیر سیستم'
