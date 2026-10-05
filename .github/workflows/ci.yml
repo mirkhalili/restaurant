@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with: {php-version: '8.3'}
-      - run: php -l public_html/index.php
+      - run: php -l index.php
       - run: php -l src/Core/Database.php
       - run: php -l src/Core/Auth.php
       - run: php tests/smoke.php

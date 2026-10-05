@@ -3,6 +3,8 @@ DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteRule ^(?:config|database|src|views|storage|Docs|tests)(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:\.git)(?:/|$) - [F,L,NC]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.php [QSA,L]
