@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS customers (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS product_categories (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(120) NOT NULL,color VARCHAR(30) NOT NULL DEFAULT '#2563eb',sort_order INT NOT NULL DEFAULT 0,status ENUM('active','inactive') NOT NULL DEFAULT 'active',created_at DATETIME NOT NULL,updated_at DATETIME NULL,UNIQUE KEY uq_product_categories_name(name)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS products (
- id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,product_code VARCHAR(60) NOT NULL,name VARCHAR(190) NOT NULL,price DECIMAL(18,2) NOT NULL DEFAULT 0,unit VARCHAR(50) NULL,product_type VARCHAR(100) NULL,category_id BIGINT UNSIGNED NULL,status ENUM('active','inactive') DEFAULT 'active',created_at DATETIME NOT NULL,updated_at DATETIME NULL,
- UNIQUE KEY uq_products_product_code(product_code),INDEX idx_products_status(status),INDEX idx_products_name(name),INDEX idx_products_category(category_id),CONSTRAINT fk_products_category FOREIGN KEY(category_id) REFERENCES product_categories(id) ON DELETE SET NULL
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,product_code VARCHAR(60) NOT NULL,name VARCHAR(190) NOT NULL,price DECIMAL(18,2) NOT NULL DEFAULT 0,unit VARCHAR(50) NULL,product_type VARCHAR(100) NULL,status ENUM('active','inactive') DEFAULT 'active',created_at DATETIME NOT NULL,updated_at DATETIME NULL,
+ UNIQUE KEY uq_products_product_code(product_code),INDEX idx_products_status(status),INDEX idx_products_name(name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO product_categories(name,color,sort_order,status,created_at) VALUES ('سایر','#2563eb',999,'active',NOW()) ON DUPLICATE KEY UPDATE name=VALUES(name);
 CREATE TABLE IF NOT EXISTS orders (
