@@ -40,11 +40,23 @@ if ($page === 'orders') {
 }
 
 if ($page === 'customers') {
-    $heading='مشتریان'; $createUrl='/?page=customers'; $action='create_customer';
-    $data=App\Http\Controllers\CrudController::customers($db);
-} elseif ($page === 'products') {
-    $heading='غذاها و محصولات'; $createUrl='/?page=products'; $action='create_product';
-    $data=App\Http\Controllers\CrudController::products($db);
+    $data = App\Http\Controllers\CrudController::customers($db);
+    $title = 'مشتریان';
+    $page = 'customers';
+    extract($data);
+    ob_start(); require __DIR__.'/views/customers.php'; $content = ob_get_clean();
+    require __DIR__.'/views/layout.php'; exit;
+}
+
+if ($page === 'products') {
+    $data = App\Http\Controllers\CrudController::products($db);
+    $title = 'منو و محصولات';
+    $page = 'products';
+    extract($data);
+    ob_start(); require __DIR__.'/views/products.php'; $content = ob_get_clean();
+    require __DIR__.'/views/layout.php'; exit;
+}
+
 } elseif (in_array($page,['inventory','kitchen','reports','users','settings','audit'],true)) {
     ob_start(); require __DIR__.'/views/module-placeholder.php'; $content=ob_get_clean();
     $title='ماژول'; require __DIR__.'/views/layout.php'; exit;
@@ -54,5 +66,4 @@ if ($page === 'customers') {
     $title='داشبورد'; require __DIR__.'/views/layout.php'; exit;
 }
 
-extract($data); ob_start(); require __DIR__.'/views/crud.php'; $content=ob_get_clean();
-$title=$heading; require __DIR__.'/views/layout.php';
+
