@@ -4,66 +4,51 @@
 
 ## نسخه
 
-**QAVNS: `003.3.0.0`**
+**QAVNS: `004.4.0.0`**
 
-این نگارش یک تغییر بنیادی زیرساختی است: پروژه برای استقرار مستقیم روی هاست اشتراکی پارس‌پک با **PHP + MariaDB** آماده شده و وابستگی به Docker، Docker Compose و `.env` حذف شده است.
+از این نسخه **Repository Root = public_html** است. یعنی ZIP ریپو مستقیماً محتوای مورد نیاز `public_html` را در اختیار شما قرار می‌دهد و `index.php` باید مستقیماً در ریشه `public_html` قرار گیرد.
 
-## ساختار استقرار
+## ساختار Repository
 
 ```text
 restaurant/
-├── public_html/              # تنها مسیر قابل دسترسی از وب
-│   ├── index.php
-│   ├── .htaccess
-│   └── assets/
-├── config/                   # تنظیمات خصوصی
-│   ├── config.php
-│   └── config.local.php      # روی سرور ایجاد می‌شود؛ در Git قرار نمی‌گیرد
-├── src/                      # کد برنامه
-├── views/                    # قالب‌ها
+├── index.php
+├── .htaccess
+├── assets/
+├── config/
+├── src/
+├── views/
 ├── database/
-│   ├── schema.sql
-│   └── seed.sql
-├── storage/                  # فایل‌های تولیدی و موقت
+├── storage/
 ├── Docs/
 ├── tests/
-└── VERSION
+├── .github/
+├── .gitignore
+├── VERSION
+└── README.md
 ```
 
-## نیازمندی هاست
-
-- PHP 8.1 یا بالاتر
-- MariaDB 10.5+ یا نسخه سازگار ارائه‌شده توسط هاست
-- PHP extensions: `PDO` و `pdo_mysql`
-- Apache با `mod_rewrite` برای routing
-- HTTPS فعال
-- امکان ساخت Database و Database User از پنل هاست
-- امکان Import SQL در phpMyAdmin
+در ZIP خروجی GitHub دیگر پوشه‌ای به نام `public_html/` داخل Repository وجود ندارد. محتویات Repository را مستقیماً داخل `public_html` هاست قرار دهید.
 
 ## نصب روی پارس‌پک
 
-1. یک Database و User از پنل هاست ایجاد کنید.
-2. Database را در phpMyAdmin انتخاب و `database/schema.sql` را Import کنید.
-3. سپس `database/seed.sql` را Import کنید.
-4. فایل `config/config.local.php.example` را به `config/config.local.php` کپی کنید.
-5. مقادیر اتصال MariaDB و دامنه را در `config/config.local.php` وارد کنید.
-6. کل پروژه را روی هاست قرار دهید و **Document Root** دامنه را روی `public_html` بگذارید.
-7. دسترسی نوشتن را فقط برای `storage/` در صورت نیاز فعال کنید.
-8. سایت را با HTTPS باز کنید.
+1. Database و Database User بسازید.
+2. `database/schema.sql` و سپس `database/seed.sql` را در phpMyAdmin Import کنید.
+3. `config/config.local.php.example` را به `config/config.local.php` تبدیل و اطلاعات MariaDB را وارد کنید.
+4. کل محتویات ZIP Repository را مستقیماً داخل `public_html` قرار دهید.
+5. اطمینان حاصل کنید مسیر نهایی `public_html/index.php` است.
+6. HTTPS را فعال کنید.
 
-### نکته امنیتی
+`config/config.local.php` در Git قرار نمی‌گیرد و با `.htaccess` از دسترسی HTTP محافظت می‌شود.
 
-فایل `config/config.local.php` حاوی رمز دیتابیس است و نباید در Git یا `public_html` قرار گیرد. همچنین رمز حساب مدیر اولیه را بلافاصله بعد از نصب تغییر دهید.
+## نیازمندی
 
-حساب seed اولیه:
-`admin@example.com` / `password`
+- PHP 8.1+
+- MariaDB 10.5+
+- PDO و pdo_mysql
+- Apache + mod_rewrite
+- HTTPS
 
 ## API سلامت
 
-پس از نصب، مسیر زیر برای بررسی سلامت برنامه در دسترس است:
-
-`/api/v1/health`
-
-## توسعه
-
-قواعد نسخه‌گذاری QAVNS در `Docs/19-versioning.md` و راهنمای استقرار هاست اشتراکی در `Docs/21-shared-host-deployment.md` قرار دارد.
+`/api/v1/health` باید JSON شامل `status=ok` و نسخه جاری پروژه برگرداند.
