@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use PDO;
-use App\\Support\\PersianDate;
+use App\Support\PersianDate;
 final class CsvController {
  public static function customers(PDO $db,array $file): int {
   $h=self::open($file);$map=self::header(fgetcsv($h,0,',')?:[]);$n=0;
