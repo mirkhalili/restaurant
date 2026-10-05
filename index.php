@@ -57,7 +57,7 @@ if ($page === 'products') {
     require __DIR__.'/views/layout.php'; exit;
 }
 
-} elseif (in_array($page,['inventory','kitchen','reports','users','settings','audit'],true)) {
+if (in_array($page,['inventory','kitchen','reports','users','settings','audit'],true)) {
     ob_start(); require __DIR__.'/views/module-placeholder.php'; $content=ob_get_clean();
     $title='ماژول'; require __DIR__.'/views/layout.php'; exit;
 } else {
