@@ -25,12 +25,28 @@ final class SettingsController
                 } elseif($action==='update_category') {
                     $id=(int)($_POST['id']??0);$name=PersianText::normalize($_POST['name']??'');$color=trim((string)($_POST['color']??'#2563eb'));
                     if($id<1||$name==='') throw new \RuntimeException('اطلاعات دسته‌بندی کامل نیست.');
-                    $s=$db->prepare('UPDATE product_categories SET name=?,color=?,sort_order=?,status=?,updated_at=NOW() WHERE id=?');
-                    $s->execute([$name,$color,(int)($_POST['sort_order']??0),($_POST['status']??'active')==='active'?'active':'inactive',$id]);
-                    $message='دسته‌بندی ویرایش شد.';
+                    $s=$db->prepare('SELECT name FROM product_categories WHERE id=?'); $s->execute([$id]); $old=$s->fetchColumn();
+                    if(!$old) throw new \RuntimeException('نوع موردنظر پیدا نشد.');
+                    $db->beginTransaction();
+                    try {
+                        if($old!==$name){$m=$db->prepare('UPDATE products SET product_type=?,updated_at=NOW() WHERE product_type=?');$m->execute([$name,$old]);}
+                        $s=$db->prepare('UPDATE product_categories SET name=?,color=?,sort_order=?,status=?,updated_at=NOW() WHERE id=?');
+                        $s->execute([$name,$color,(int)($_POST['sort_order']??0),($_POST['status']??'active')?'active':'inactive',$id]);
+                        $db->commit();
+                    } catch(\Throwable $e){$db->rollBack();throw $e;}
+                    $message='نوع محصول ویرایش شد.';
                 } elseif($action==='delete_category') {
                     $id=(int)($_POST['id']??0);
-                    $s=$db->prepare('DELETE FROM product_categories WHERE id=?');$s->execute([$id]);$message='دسته‌بندی حذف شد.';
+                    if($id<1) throw new \RuntimeException('نوع نامعتبر است.');
+                    $s=$db->prepare('SELECT name FROM product_categories WHERE id=?');$s->execute([$id]);$old=$s->fetchColumn();
+                    if(!$old) throw new \RuntimeException('نوع موردنظر پیدا نشد.');
+                    $db->beginTransaction();
+                    try {
+                        $m=$db->prepare('UPDATE products SET product_type=NULL,updated_at=NOW() WHERE product_type=?');$m->execute([$old]);
+                        $s=$db->prepare('DELETE FROM product_categories WHERE id=?');$s->execute([$id]);
+                        $db->commit();
+                    } catch(\Throwable $e){$db->rollBack();throw $e;}
+                    $message='نوع محصول حذف شد و محصولات آن بدون نوع باقی ماندند.';
                 }
             }
         } catch(\Throwable $e){$error=self::friendly($e);}
