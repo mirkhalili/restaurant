@@ -34,7 +34,7 @@ final class SettingsController
                 }
             }
         } catch(\Throwable $e){$error=self::friendly($e);}
-        $rows=$db->query('SELECT c.*,COUNT(p.id) product_count FROM product_categories c LEFT JOIN products p ON p.category_id=c.id GROUP BY c.id ORDER BY c.sort_order,c.name')->fetchAll();
+        $rows=$db->query('SELECT c.*,COUNT(p.id) product_count FROM product_categories c LEFT JOIN products p ON p.product_type=c.name GROUP BY c.id ORDER BY c.sort_order,c.name')->fetchAll();
         return compact('rows','message','error');
     }
 
