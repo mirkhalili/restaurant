@@ -1,21 +1,15 @@
 <?php
 declare(strict_types=1);
 
-$local = __DIR__ . '/config.local.php';
-
-if (is_file($local)) {
-    return require $local;
-}
-
 return [
     'app_env' => 'production',
-    'app_url' => 'https://example.com',
+    'app_url' => 'https://YOUR-DOMAIN.example',
     'db' => [
         'host' => 'localhost',
         'port' => 3306,
-        'name' => 'restaurant',
-        'user' => 'restaurant',
-        'pass' => 'CHANGE_ME',
+        'name' => 'YOUR_CPANEL_DATABASE',
+        'user' => 'YOUR_CPANEL_DATABASE_USER',
+        'pass' => 'YOUR_DATABASE_PASSWORD',
         'charset' => 'utf8mb4',
     ],
     'session' => [

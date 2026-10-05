@@ -1,0 +1,16 @@
+# Local/shared-host secrets
+/config/config.local.php
+
+# Runtime
+/storage/*
+!/storage/.gitignore
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Temporary files
+*.log
+*.tmp
