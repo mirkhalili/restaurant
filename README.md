@@ -18,6 +18,6 @@ docker compose up -d --build
 ```
 سپس `http://localhost:8080` را باز کنید.
 
-Seed: `admin@example.com` / `ChangeMe!123`
+Seed: `admin@example.com` / `password`
 
 قواعد QAVNS در `Docs/19-versioning.md` آمده است.
