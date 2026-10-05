@@ -99,24 +99,24 @@ final class CsvController
                 $status = in_array($status, ['0', 'false', 'inactive', 'غیرفعال'], true) ? 'inactive' : 'active';
 
                 $s = $db->prepare(
-                    'INSERT INTO products(product_code,name,price,unit,product_type,category_id,status,created_at)
-                     VALUES(?,?,?,?,?,?,?,NOW())
+                    'INSERT INTO products(product_code,name,price,unit,product_type,status,created_at)
+                     VALUES(?,?,?,?,?,?,NOW())
                      ON DUPLICATE KEY UPDATE
                      name=VALUES(name),
                      price=VALUES(price),
                      unit=VALUES(unit),
                      product_type=VALUES(product_type),
-                     category_id=VALUES(category_id),
                      status=VALUES(status),
                      updated_at=NOW()'
                 );
 
+                $type=self::get($r, $map, ['دسته‌بندی','دسته بندی','category','نوع کالا', 'نوع محصول', 'product_type']);
                 $s->execute([
                     $code,
                     $name,
                     $price,
                     self::get($r, $map, ['واحد', 'unit']) ?: null,
-                    self::categoryId($db, self::get($r, $map, ['دسته‌بندی','دسته بندی','category','نوع کالا', 'نوع محصول', 'product_type'])),
+                    $type !== '' ? PersianText::normalize($type) : null,
                     $status
                 ]);
                 $n++;
@@ -132,12 +132,6 @@ final class CsvController
         return $n;
     }
 
-    private static function categoryId(PDO $db, string $name): ?int
-    {
-        if($name==='') return null;
-        $s=$db->prepare('SELECT id FROM product_categories WHERE name=? LIMIT 1');$s->execute([PersianText::normalize($name)]);
-        $id=$s->fetchColumn(); return $id ? (int)$id : null;
-    }
 
     private static function open(array $f)
     {
@@ -212,7 +206,7 @@ final class CsvController
     {
         $value = preg_replace('/^\xEF\xBB\xBF/', '', $value) ?? $value;
         $value = str_replace(["\xC2\xA0", "\xE2\x80\x8C", "\xE2\x80\x8D"], ' ', $value);
-        $value = str_replace(['ي', 'ى', 'ئ'], 'ی', $value);
+        $value = str_replace(['ي', 'ى'], 'ی', $value);
         $value = str_replace(['ك'], 'ک', $value);
         $value = preg_replace('/\s+/u', ' ', trim($value)) ?? trim($value);
         return mb_strtolower($value);
