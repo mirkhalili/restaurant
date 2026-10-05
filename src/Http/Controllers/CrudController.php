@@ -39,6 +39,7 @@ final class CrudController
                     case 'update_product': RestaurantController::updateProduct($db); $message='محصول ویرایش شد.'; break;
                     case 'delete_product': RestaurantController::deleteProduct($db); $message='محصول حذف شد.'; break;
                     case 'bulk_delete_products': $message=RestaurantController::bulkDeleteProducts($db).' محصول حذف شد.'; break;
+                    case 'bulk_assign_product_type': $message=RestaurantController::bulkAssignProductType($db).' محصول به نوع انتخاب‌شده منتقل شد.'; break;
                     case 'import_products_csv': $message=CsvController::products($db,$_FILES['csv']??[]).' محصول وارد/به‌روزرسانی شد.'; break;
                 }
             }
