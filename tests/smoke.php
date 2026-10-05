@@ -6,13 +6,14 @@ foreach ([
     'VERSION',
     'database/schema.sql',
     'database/seed.sql',
-    'public_html/index.php',
-    'public_html/.htaccess',
+    'index.php',
+    '.htaccess',
     'config/config.php',
     'config/config.local.php.example',
     'Docs/QAVNS.md',
     'Docs/19-versioning.md',
     'Docs/21-shared-host-deployment.md',
+    'Docs/24-release-notes-004.4.0.0.md',
 ] as $f) {
     if (!is_file($root . '/' . $f)) {
         throw new RuntimeException("Missing $f");
