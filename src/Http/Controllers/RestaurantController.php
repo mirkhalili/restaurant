@@ -73,7 +73,7 @@ final class RestaurantController
         $first=trim((string)($_POST['first_name']??'')); $last=trim((string)($_POST['last_name']??''));
         if($id<1||$first===''||$last===''||$phone==='') throw new \RuntimeException('نام، نام خانوادگی و شماره تلفن الزامی است.');
         $s=$db->prepare('UPDATE customers SET subscription_code=?,first_name=?,last_name=?,name=?,phone=?,mobile=?,membership_date=?,address=?,birth_date=?,updated_at=NOW() WHERE id=?');
-        $s->execute([trim((string)($_POST['subscription_code']??''))?:null,$first,$last,trim($first.' '.$last),$phone,self::normalizeDigits($_POST['mobile']??'')?:null,P persianDate::toGregorian($_POST['membership_date']??''),trim((string)($_POST['address']??''))?:null,P persianDate::toGregorian($_POST['birth_date']??''),$id]);
+        $s->execute([trim((string)($_POST['subscription_code']??''))?:null,$first,$last,trim($first.' '.$last),$phone,self::normalizeDigits($_POST['mobile']??'')?:null,PersianDate::toGregorian($_POST['membership_date']??''),trim((string)($_POST['address']??''))?:null,PersianDate::toGregorian($_POST['birth_date']??''),$id]);
     }
 
     public static function deleteCustomer(PDO $db): void
