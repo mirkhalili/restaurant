@@ -31,7 +31,7 @@ final class SettingsController
                     try {
                         if($old!==$name){$m=$db->prepare('UPDATE products SET product_type=?,updated_at=NOW() WHERE product_type=?');$m->execute([$name,$old]);}
                         $s=$db->prepare('UPDATE product_categories SET name=?,color=?,sort_order=?,status=?,updated_at=NOW() WHERE id=?');
-                        $s->execute([$name,$color,(int)($_POST['sort_order']??0),($_POST['status']??'active')?'active':'inactive',$id]);
+                        $s->execute([$name,$color,(int)($_POST['sort_order']??0),($_POST['status']??'active')==='active'?'active':'inactive',$id]);
                         $db->commit();
                     } catch(\Throwable $e){$db->rollBack();throw $e;}
                     $message='نوع محصول ویرایش شد.';
