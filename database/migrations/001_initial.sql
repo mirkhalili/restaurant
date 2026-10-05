@@ -1,0 +1,2 @@
+-- Initial schema is provided in database/schema.sql for fresh installations.
+-- Future changes must use ordered migrations and never rewrite an applied migration.
