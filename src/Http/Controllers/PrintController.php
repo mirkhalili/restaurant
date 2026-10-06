@@ -17,7 +17,7 @@ final class PrintController
                          LEFT JOIN customers c ON c.id=o.customer_id WHERE i.invoice_no=? LIMIT 1");
         $s->execute([$invoiceNo]);$invoice=$s->fetch();
         if(!$invoice) throw new \RuntimeException('فاکتور برای چاپ پیدا نشد.');
-        $s=$db->prepare("SELECT oi.quantity,oi.unit_price,oi.line_total,p.name,p.unit,p.product_type FROM order_items oi JOIN products p ON p.id=oi.product_id WHERE oi.order_id=? ORDER BY p.product_type,oi.id");
+        $s=$db->prepare("SELECT oi.quantity,oi.unit_price,oi.line_total,p.name,p.unit,p.product_type,c.icon category_icon FROM order_items oi JOIN products p ON p.id=oi.product_id LEFT JOIN product_categories c ON c.name=p.product_type WHERE oi.order_id=? ORDER BY p.product_type,oi.id");
         $s->execute([(int)$invoice['order_id']]);$items=$s->fetchAll();
         $printers=$db->query("SELECT * FROM printers WHERE status='active' ORDER BY is_default DESC,name")->fetchAll();
         $kitchenPrinters=$db->query("SELECT * FROM printers WHERE status='active' AND printer_type='kitchen' ORDER BY is_default DESC,name")->fetchAll();
