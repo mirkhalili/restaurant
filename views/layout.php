@@ -1,5 +1,7 @@
 <?php
 $activePage = $page ?? ($_GET['page'] ?? 'dashboard');
+$restaurantName='رستوران';
+if(isset($db)) { try { $restaurantRow=$db->query('SELECT name FROM restaurant_profile WHERE id=1 LIMIT 1')->fetch(); if($restaurantRow && trim((string)$restaurantRow['name'])!=='') $restaurantName=trim((string)$restaurantRow['name']); } catch (\Throwable $e) {} }
 $navGroups = [
   ['title'=>'عملیات','items'=>[
     ['key'=>'dashboard','label'=>'داشبورد','icon'=>'⌂','url'=>'/'],
@@ -23,7 +25,7 @@ $navGroups = [
 <html lang="fa" dir="rtl" data-theme="light">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?=htmlspecialchars($title??'رستوران')?></title>
+<title><?=htmlspecialchars($restaurantName.' | '.($title??'اتوماسیون'))?></title>
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="/assets/style.css">
 </head>
@@ -33,7 +35,7 @@ $navGroups = [
   <aside class="sidebar" data-sidebar aria-label="منوی اصلی">
     <div class="brand">
       <div class="brand-mark">🍽</div>
-      <div class="brand-copy"><strong>رستوران</strong><small>اتوماسیون مدیریت</small></div>
+      <div class="brand-copy"><strong><?=htmlspecialchars($restaurantName)?></strong><small>اتوماسیون مدیریت</small></div>
       <button class="icon-btn sidebar-collapse" data-sidebar-collapse aria-label="جمع کردن منو">‹</button>
     </div>
     <div class="branch-switcher">
