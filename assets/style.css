@@ -113,3 +113,9 @@ body.sidebar-collapsed .sidebar{width:76px}body.sidebar-collapsed .brand-copy,bo
 .audit-details summary{display:inline-flex;align-items:center;cursor:pointer;color:var(--primary);font-weight:700;padding:5px 8px;border-radius:7px;background:var(--primary-soft)}
 .audit-details summary::marker{display:none}
 @media print{.kitchen-slip{display:none!important}}
+
+/* v018.9.0.4: persistent product type filter and category color */
+.product-type-filters .type-filter{border:1px solid var(--line);background:var(--surface);color:var(--text);position:relative;overflow:hidden;transition:.15s}
+.product-type-filters .type-filter::before{content:'';position:absolute;right:0;top:0;bottom:0;width:4px;background:var(--filter-color,var(--primary));opacity:.9}
+.product-type-filters .type-filter.active{background:color-mix(in srgb,var(--filter-color,var(--primary)) 14%,var(--surface));border-color:var(--filter-color,var(--primary));color:var(--text);box-shadow:0 0 0 2px color-mix(in srgb,var(--filter-color,var(--primary)) 12%,transparent)}
+.product-card button{border-top:4px solid var(--card-type-color,var(--line));}
