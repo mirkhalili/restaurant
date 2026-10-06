@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace AppHttpControllers;
+namespace App\Http\Controllers;
 
-use AppCoreAuth;
-use AppSupportAuditLogger;
-use AppSupportPersianDate;
+use App\Core\Auth;
+use App\Support\AuditLogger;
+use App\Support\PersianDate;
 use PDO;
 
 final class ReportsController
