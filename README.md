@@ -57,10 +57,13 @@ restaurant/
 
 1. Database و Database User بسازید.
 2. `database/schema.sql` و سپس `database/seed.sql` را در phpMyAdmin Import کنید.
-3. `config/config.local.php.example` را به `config/config.local.php` تبدیل و اطلاعات MariaDB را وارد کنید.
-4. کل محتویات ZIP Repository را مستقیماً داخل `public_html` قرار دهید.
-5. اطمینان حاصل کنید مسیر نهایی `public_html/index.php` است.
-6. HTTPS را فعال کنید.
+3. Migrationهای `database/migrations/001...006` را به‌ترتیب روی دیتابیس موجود اجرا کنید؛ برای نسخه فعلی، Migration شماره `006_pos_print_auth_reports.sql` الزامی است.
+4. `config/config.local.php.example` را به `config/config.local.php` تبدیل و اطلاعات MariaDB را وارد کنید.
+5. کل محتویات ZIP Repository را مستقیماً داخل `public_html` قرار دهید.
+6. اطمینان حاصل کنید مسیر نهایی `public_html/index.php` است.
+7. HTTPS را فعال کنید.
+
+برای فراموشی رمز، مقدار `mail.from` را در `config/config.local.php` تنظیم کنید. ارسال ایمیل از `mail()` هاست استفاده می‌کند.
 
 `config/config.local.php` در Git قرار نمی‌گیرد و با `.htaccess` از دسترسی HTTP محافظت می‌شود.
 
