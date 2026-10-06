@@ -80,11 +80,11 @@ final class InvoiceController
             $del=$db->prepare('DELETE FROM order_items WHERE id=?');
             $submitted=(array)($_POST['qty']??[]);
             foreach($existing as $it){
-                $id=(int)$it['id'];$qty=(float)($submitted[$id]??0);
+                $id=(int)$it['id'];$qty=(int)($submitted[$id]??0);
                 if($qty<=0){$del->execute([$id]);continue;}
                 $line=$qty*(float)$it['unit_price'];$upd->execute([$qty,$line,$id]);$total+=$line;
             }
-            $newProduct=(int)($_POST['new_product_id']??0);$newQty=(float)($_POST['new_quantity']??0);
+            $newProduct=(int)($_POST['new_product_id']??0);$newQty=(int)($_POST['new_quantity']??0);
             if($newProduct>0&&$newQty>0){
                 $p=$db->prepare("SELECT id,price FROM products WHERE id=? AND status='active'");$p->execute([$newProduct]);$product=$p->fetch();
                 if(!$product) throw new \RuntimeException('محصول جدید معتبر نیست.');
