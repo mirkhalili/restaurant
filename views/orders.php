@@ -1,12 +1,123 @@
 <section class="page-head"><div><div class="eyebrow">POS / فروش</div><h1>ثبت سفارش و صدور فاکتور</h1><p>مشتری را انتخاب کنید، سپس محصولات را به پیش‌فاکتور اضافه کنید.</p></div></section>
-<?php if(!empty($message)): ?><div class="alert success"><?=htmlspecialchars($message)?></div><?php endif; ?><?php if(!empty($error)): ?><div class="alert"><?=htmlspecialchars($error)?></div><?php endif; ?>
-<div class="pos-grid"><section class="card pos-main">
-<?php if(!$customer): ?><div class="card-head"><div><h2>۱. انتخاب مشتری</h2><small>جستجو به‌صورت لحظه‌ای</small></div></div><div class="customer-search"><input class="field" id="customer-live-search" autocomplete="off" value="<?=htmlspecialchars($phone??'')?>" inputmode="search" placeholder="نام، نام خانوادگی یا شماره تلفن"><span class="search-status" id="customer-search-status">برای جستجو شروع به تایپ کنید</span></div><div id="customer-suggestions" class="customer-suggestions" hidden></div>
-<?php if(($phone??'')!==''): ?><form method="post" class="new-order-customer"><input type="hidden" name="action" value="add_customer_order"><div class="new-customer-head"><strong>مشتری پیدا نشد</strong><small>اطلاعات را ثبت کنید تا برای همین سفارش انتخاب شود.</small></div><div class="order-customer-grid"><label>نام *<input name="first_name" required></label><label>نام خانوادگی *<input name="last_name" required></label><label>شماره تلفن *<input name="phone" required value="<?=htmlspecialchars($phone)?>"></label><label>موبایل<input name="mobile"></label><label>کد اشتراک<input name="subscription_code"></label><label>تاریخ عضویت<input name="membership_date"></label><label>تاریخ تولد<input name="birth_date"></label><label>آدرس<input name="address"></label></div><button class="btn btn-primary">ثبت و انتخاب مشتری</button></form><?php endif; ?><?php else: ?>
-<div class="order-type-panel"><div><strong>نوع سفارش</strong><small>سالن یا بیرون‌بر را مشخص کنید</small></div><div class="order-type-buttons"><?php foreach(['سالن'=>'🍽️','بیرون‌بر'=>'🥡'] as $type=>$icon): ?><form method="post"><input type="hidden" name="action" value="set_order_type"><input type="hidden" name="order_type" value="<?=htmlspecialchars($type)?>"><button class="order-type-btn <?=($orderType===$type?'active':'')?>" type="submit"><span><?=$icon?></span><?=$type?></button></form><?php endforeach; ?></div></div><div class="customer-selected-bar"><div><span>مشتری سفارش</span><strong><?=htmlspecialchars($customer['name'])?></strong><small><?=htmlspecialchars($customer['phone'])?></small></div><form method="post"><input type="hidden" name="action" value="remove_customer_order"><button class="btn btn-sm btn-danger">حذف مشتری از سفارش</button></form></div>
-<div class="card-head product-head"><div><h2>۲. انتخاب محصولات</h2><small>لیست محصولات فعال · محصولات مجاز برای «<?=htmlspecialchars($orderType)?>» به‌صورت پیش‌فرض در فاکتور قرار می‌گیرند.</small></div><input class="search-input" data-product-search placeholder="جستجوی محصول..."></div><div class="product-type-filters" data-type-filters><button type="button" class="type-filter active" data-type="all"><span>🍽️</span>همه</button><?php foreach($productTypes as $t): ?><button type="button" class="type-filter" data-type="<?=htmlspecialchars($t['name'])?>" style="--filter-color:<?=htmlspecialchars($t['color'])?>"><span><?=htmlspecialchars($t['icon']??'🍽️')?></span><?=htmlspecialchars($t['name'])?></button><?php endforeach; ?></div><div class="product-grid" data-products><?php foreach($products as $p): ?><form class="product-card" method="post" data-product data-type="<?=htmlspecialchars($p['category_name']??$p['product_type']??'')?>" style="--product-color:<?=htmlspecialchars($p['category_color']??'#64748b')?>"><input type="hidden" name="action" value="add_item"><input type="hidden" name="product_id" value="<?=$p['id']?>"><button type="submit"><span class="product-category-icon" aria-label="<?=htmlspecialchars($p['category_name']??'بدون نوع')?>"><?=htmlspecialchars($p['category_icon']??'🍽️')?></span><span class="product-type"><?=htmlspecialchars($p['category_name']??$p['product_type']??'بدون نوع')?></span><strong><?=htmlspecialchars($p['name'])?></strong><small><?=htmlspecialchars($p['product_code']??'')?></small><b><?=number_format((float)$p['price'])?> <i>ریال</i></b></button></form><?php endforeach; ?></div>
-<?php endif; ?></section>
-<aside class="card invoice-card"><div class="invoice-top"><div><span>پیش‌فاکتور</span><strong>جدید</strong></div><div class="invoice-date"><?=htmlspecialchars(App\Support\PersianDate::today())?></div></div><div class="invoice-order-type"><span>نوع سفارش</span><strong><?=htmlspecialchars($orderType)?></strong></div><div class="invoice-customer"><?php if($customer): ?><span>مشخصات مشتری</span><strong><?=htmlspecialchars($customer['name'])?></strong><small>تلفن: <?=htmlspecialchars($customer['phone'])?></small><small>موبایل: <?=htmlspecialchars($customer['mobile']??'—')?> · اشتراک: <?=htmlspecialchars($customer['subscription_code']??'—')?></small><?php else: ?><span class="muted">مشتری انتخاب نشده</span><?php endif; ?></div><div class="invoice-items"><?php if(!$items): ?><div class="empty compact"><strong>فاکتور خالی است</strong><span>از لیست محصولات انتخاب کنید.</span></div><?php else: foreach($items as $it): ?><div class="invoice-item"><div><strong><?=htmlspecialchars($it['name'])?></strong><small><?=number_format((float)$it['price'])?> × <?=$it['qty']?></small></div><b><?=number_format((float)$it['line_total'])?></b><form method="post"><input type="hidden" name="action" value="remove_item"><input type="hidden" name="product_id" value="<?=$it['id']?>"><button aria-label="حذف">×</button></form></div><?php endforeach; endif; ?></div><div class="invoice-total"><span>مبلغ نهایی</span><strong><?=number_format((float)$total)?> <small>ریال</small></strong></div><form method="post" class="finalize-form"><input type="hidden" name="action" value="finalize"><input type="hidden" name="customer_phone" value="<?=htmlspecialchars($customer['phone']??'')?>"><label>شیوه پرداخت<select name="payment_method"><option value="cash">نقدی</option><option value="card">کارتخوان</option><option value="online">آنلاین</option><option value="mixed">ترکیبی</option></select></label><button class="btn btn-primary finalize-btn" <?=(!$customer||!$items)?'disabled':''?>>پرداخت و ادامه به چاپ فیش</button></form><form method="post"><input type="hidden" name="action" value="clear_cart"><button class="btn clear-btn" <?=!$items?'disabled':''?>>خالی کردن فاکتور</button></form></aside></div>
+<?php if(!empty($message)): ?><div class="alert success"><?=htmlspecialchars($message)?></div><?php endif; ?>
+<?php if(!empty($error)): ?><div class="alert"><?=htmlspecialchars($error)?></div><?php endif; ?>
+
+<div class="pos-grid">
+<section class="card pos-main">
+<?php if(!$customer): ?>
+  <div class="card-head"><div><h2>۱. انتخاب مشتری</h2><small>جستجو به‌صورت لحظه‌ای</small></div></div>
+  <div class="customer-search"><input class="field" id="customer-live-search" autocomplete="off" value="<?=htmlspecialchars($phone??'')?>" inputmode="search" placeholder="نام، نام خانوادگی یا شماره تلفن"><span class="search-status" id="customer-search-status">برای جستجو شروع به تایپ کنید</span></div>
+  <div id="customer-suggestions" class="customer-suggestions" hidden></div>
+  <?php if(($phone??'')!==''): ?>
+    <form method="post" class="new-order-customer">
+      <input type="hidden" name="action" value="add_customer_order">
+      <div class="new-customer-head"><strong>مشتری پیدا نشد</strong><small>اطلاعات را ثبت کنید تا برای همین سفارش انتخاب شود.</small></div>
+      <div class="order-customer-grid">
+        <label>نام *<input name="first_name" required></label>
+        <label>نام خانوادگی *<input name="last_name" required></label>
+        <label>شماره تلفن *<input name="phone" required value="<?=htmlspecialchars($phone)?>"></label>
+        <label>موبایل<input name="mobile"></label>
+        <label>کد اشتراک<input name="subscription_code"></label>
+        <label>تاریخ عضویت<input name="membership_date"></label>
+        <label>تاریخ تولد<input name="birth_date"></label>
+        <label>آدرس<input name="address"></label>
+      </div>
+      <button class="btn btn-primary">ثبت و انتخاب مشتری</button>
+    </form>
+  <?php endif; ?>
+<?php else: ?>
+  <div class="order-type-panel">
+    <div><strong>نوع سفارش</strong><small>سالن یا بیرون‌بر را مشخص کنید</small></div>
+    <div class="order-type-buttons">
+      <?php foreach(['سالن'=>'🍽️','بیرون‌بر'=>'🥡'] as $type=>$icon): ?>
+        <form method="post">
+          <input type="hidden" name="action" value="set_order_type">
+          <input type="hidden" name="order_type" value="<?=htmlspecialchars($type)?>">
+          <button class="order-type-btn <?=($orderType===$type?'active':'')?>" type="submit"><span><?=$icon?></span><?=$type?></button>
+        </form>
+      <?php endforeach; ?>
+    </div>
+  </div>
+
+  <div class="card-head product-head">
+    <div><h2>۲. انتخاب محصولات</h2><small>محصولات مجاز برای «<?=htmlspecialchars($orderType)?>» به‌صورت پیش‌فرض در فاکتور قرار گرفته‌اند.</small></div>
+    <input class="search-input" data-product-search placeholder="جستجوی محصول...">
+  </div>
+
+  <div class="product-type-filters" data-type-filters>
+    <button type="button" class="type-filter active" data-type="all"><span>همه</span></button>
+    <?php foreach($productTypes as $t): ?>
+      <button type="button" class="type-filter" data-type="<?=htmlspecialchars($t['name'])?>" style="--filter-color:<?=htmlspecialchars($t['color'])?>"><span><?=htmlspecialchars($t['name'])?></span></button>
+    <?php endforeach; ?>
+  </div>
+
+  <div class="product-grid" data-products>
+    <?php foreach($products as $p): ?>
+      <form class="product-card" method="post" data-product data-type="<?=htmlspecialchars($p['category_name']??$p['product_type']??'')?>">
+        <input type="hidden" name="action" value="add_item">
+        <input type="hidden" name="product_id" value="<?=$p['id']?>">
+        <button type="submit">
+          <span class="product-type"><?=htmlspecialchars($p['category_name']??$p['product_type']??'بدون نوع')?></span>
+          <strong><?=htmlspecialchars($p['name'])?></strong>
+          <small><?=htmlspecialchars($p['product_code']??'')?></small>
+          <b><?=number_format((float)$p['price'])?> <i>ریال</i></b>
+        </button>
+      </form>
+    <?php endforeach; ?>
+  </div>
+<?php endif; ?>
+</section>
+
+<aside class="card invoice-card">
+  <div class="invoice-top">
+    <div><span>پیش‌فاکتور</span><strong>جدید</strong></div>
+    <div class="invoice-date"><?=htmlspecialchars(App\Support\PersianDate::today())?></div>
+  </div>
+
+  <div class="invoice-order-type" aria-label="نوع سفارش">
+    <strong><?=htmlspecialchars($orderType)?></strong>
+  </div>
+
+  <div class="invoice-customer">
+    <?php if($customer): ?>
+      <div class="invoice-customer-main">
+        <span>مشتری</span>
+        <strong><?=htmlspecialchars($customer['name'])?></strong>
+        <small>تلفن: <?=htmlspecialchars($customer['phone'])?></small>
+      </div>
+      <form method="post" class="invoice-customer-remove">
+        <input type="hidden" name="action" value="remove_customer_order">
+        <button type="submit" class="invoice-customer-remove-btn" aria-label="حذف مشتری از سفارش" title="حذف مشتری از سفارش">×</button>
+      </form>
+    <?php else: ?>
+      <span class="muted">مشتری انتخاب نشده</span>
+    <?php endif; ?>
+  </div>
+
+  <div class="invoice-items">
+    <?php if(!$items): ?>
+      <div class="empty compact"><strong>فاکتور خالی است</strong><span>از لیست محصولات انتخاب کنید.</span></div>
+    <?php else: foreach($items as $it): ?>
+      <div class="invoice-item">
+        <div><strong><?=htmlspecialchars($it['name'])?></strong><small><?=number_format((float)$it['price'])?> × <?=$it['qty']?></small></div>
+        <b><?=number_format((float)$it['line_total'])?></b>
+        <form method="post"><input type="hidden" name="action" value="remove_item"><input type="hidden" name="product_id" value="<?=$it['id']?>"><button aria-label="حذف">×</button></form>
+      </div>
+    <?php endforeach; endif; ?>
+  </div>
+
+  <div class="invoice-total"><span>مبلغ نهایی</span><strong><?=number_format((float)$total)?> <small>ریال</small></strong></div>
+  <form method="post" class="finalize-form">
+    <input type="hidden" name="action" value="finalize">
+    <input type="hidden" name="customer_phone" value="<?=htmlspecialchars($customer['phone']??'')?>">
+    <label>شیوه پرداخت<select name="payment_method"><option value="cash">نقدی</option><option value="card">کارتخوان</option><option value="online">آنلاین</option><option value="mixed">ترکیبی</option></select></label>
+    <button class="btn btn-primary finalize-btn" <?=(!$customer||!$items)?'disabled':''?>>پرداخت و ادامه به چاپ فیش</button>
+  </form>
+  <form method="post"><input type="hidden" name="action" value="clear_cart"><button class="btn clear-btn" <?=!$items?'disabled':''?>>خالی کردن فاکتور</button></form>
+</aside>
+</div>
+
 <script>
-(()=>{const input=document.getElementById('customer-live-search'),box=document.getElementById('customer-suggestions'),status=document.getElementById('customer-search-status');if(!input||!box)return;let timer;const normalize=s=>s.replace(/[يى]/g,'ی').replace(/ك/g,'ک');input.addEventListener('input',()=>{clearTimeout(timer);const q=normalize(input.value.trim());if(q.length<2){box.hidden=true;status.textContent='حداقل دو حرف یا رقم وارد کنید';return}status.textContent='در حال جستجو…';timer=setTimeout(()=>fetch('/api/v1/customers/search?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>{box.innerHTML='';if(!d.items.length){box.hidden=true;status.textContent='مشتری پیدا نشد';return}d.items.forEach(c=>{const a=document.createElement('button');a.type='button';a.className='customer-suggestion';a.innerHTML='<strong>'+c.name+'</strong><small>'+c.phone+(c.mobile?' · '+c.mobile:'')+'</small>';a.addEventListener('click',()=>location.href='/?page=orders&phone='+encodeURIComponent(c.phone));box.appendChild(a)});box.hidden=false;status.textContent=d.items.length+' مشتری پیدا شد'}).catch(()=>status.textContent='خطا در جستجو'),220)});document.addEventListener('click',e=>{if(!box.contains(e.target)&&e.target!==input)box.hidden=true})})();const search=document.querySelector('[data-product-search]');let selectedType='all';function filterProducts(){const q=(search?.value||'').trim().toLowerCase();document.querySelectorAll('[data-product]').forEach(x=>{const okType=selectedType==='all'||x.dataset.type===selectedType;const okSearch=!q||x.textContent.toLowerCase().includes(q);x.hidden=!(okType&&okSearch)});}search?.addEventListener('input',filterProducts);document.querySelectorAll('[data-type-filters] .type-filter').forEach(b=>b.addEventListener('click',()=>{selectedType=b.dataset.type;document.querySelectorAll('[data-type-filters] .type-filter').forEach(x=>x.classList.toggle('active',x===b));filterProducts();}));
+(()=>{const input=document.getElementById('customer-live-search'),box=document.getElementById('customer-suggestions'),status=document.getElementById('customer-search-status');if(!input||!box)return;let timer;const normalize=s=>s.replace(/[يى]/g,'ی').replace(/ك/g,'ک');input.addEventListener('input',()=>{clearTimeout(timer);const q=normalize(input.value.trim());if(q.length<2){box.hidden=true;status.textContent='حداقل دو حرف یا رقم وارد کنید';return}status.textContent='در حال جستجو…';timer=setTimeout(()=>fetch('/api/v1/customers/search?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>{box.innerHTML='';if(!d.items.length){box.hidden=true;status.textContent='مشتری پیدا نشد';return}d.items.forEach(c=>{const a=document.createElement('button');a.type='button';a.className='customer-suggestion';a.innerHTML='<strong>'+c.name+'</strong><small>'+c.phone+(c.mobile?' · '+c.mobile:'')+'</small>';a.addEventListener('click',()=>location.href='/?page=orders&phone='+encodeURIComponent(c.phone));box.appendChild(a)});box.hidden=false;status.textContent=d.items.length+' مشتری پیدا شد'}).catch(()=>status.textContent='خطا در جستجو'),220)});document.addEventListener('click',e=>{if(!box.contains(e.target)&&e.target!==input)box.hidden=true})})();
+const search=document.querySelector('[data-product-search]');let selectedType='all';function filterProducts(){const q=(search?.value||'').trim().toLowerCase();document.querySelectorAll('[data-product]').forEach(x=>{const okType=selectedType==='all'||x.dataset.type===selectedType;const okSearch=!q||x.textContent.toLowerCase().includes(q);x.hidden=!(okType&&okSearch);});}search?.addEventListener('input',filterProducts);document.querySelectorAll('[data-type-filters] .type-filter').forEach(b=>b.addEventListener('click',()=>{selectedType=b.dataset.type;document.querySelectorAll('[data-type-filters] .type-filter').forEach(x=>x.classList.toggle('active',x===b));filterProducts();}));
 </script>

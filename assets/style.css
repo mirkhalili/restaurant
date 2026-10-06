@@ -87,3 +87,29 @@ body.sidebar-collapsed .sidebar{width:76px}body.sidebar-collapsed .brand-copy,bo
 .report-section .row-actions{white-space:nowrap}
 @media(max-width:700px){.report-filter .filters{display:grid;grid-template-columns:1fr 1fr}.report-filter label{min-width:0}.report-filter .btn{width:100%}}
 @media(max-width:480px){.report-filter .filters{grid-template-columns:1fr}.invoice-order-type{margin-left:12px;margin-right:12px}}
+
+
+/* v017.9.0.3: POS, audit and direct printing */
+.invoice-order-type{justify-content:center;margin:0 18px 10px;padding:12px 10px;background:var(--primary-soft);border:1px solid color-mix(in srgb,var(--primary) 25%,var(--line))}
+.invoice-order-type strong{font-size:20px;font-weight:800;line-height:1}
+.invoice-customer{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.invoice-customer-main{min-width:0;display:grid;gap:2px}
+.invoice-customer-remove{margin:0}
+.invoice-customer-remove-btn{width:32px;height:32px;border:0;border-radius:9px;background:var(--surface);color:var(--danger);font-size:22px;line-height:1;display:grid;place-items:center;box-shadow:0 1px 4px rgba(15,23,42,.08)}
+.invoice-customer-remove-btn:hover{background:#fef2f2}
+.product-card strong{font-size:15px;line-height:1.65}
+.product-card button{justify-content:flex-start}
+.product-card b{font-size:13px}
+.product-card .product-type{font-size:9px}
+.print-page,.receipt{font-family:Vazirmatn,Tahoma,sans-serif}
+.receipt{font-family:Vazirmatn,Tahoma,sans-serif}
+.kitchen-slip{width:min(80mm,calc(100vw - 24px));margin:20px auto;padding:12px;background:#fff;border:1px dashed #aaa;color:#111;font-family:Vazirmatn,Tahoma,sans-serif}
+.kitchen-slip header{text-align:center;border-bottom:2px solid #111;padding-bottom:7px;margin-bottom:8px}
+.kitchen-slip header strong{display:block;font-size:18px}.kitchen-slip header small{font-size:10px}
+.kitchen-slip section{padding:6px 0;border-bottom:1px dashed #777}.kitchen-slip section>strong{display:block;font-size:12px;margin-bottom:4px}
+.kitchen-slip section>div{display:flex;justify-content:space-between;gap:8px;padding:4px 0}
+.kitchen-slip section>div span{font-size:14px}.kitchen-slip section>div b{font-size:20px}
+.print-error{color:var(--danger)!important}
+.audit-details summary{display:inline-flex;align-items:center;cursor:pointer;color:var(--primary);font-weight:700;padding:5px 8px;border-radius:7px;background:var(--primary-soft)}
+.audit-details summary::marker{display:none}
+@media print{.kitchen-slip{display:none!important}}

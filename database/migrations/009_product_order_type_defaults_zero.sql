@@ -1,0 +1,11 @@
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS=0;
+
+ALTER TABLE products
+  MODIFY COLUMN allow_dine_in TINYINT(1) NOT NULL DEFAULT 0,
+  MODIFY COLUMN allow_takeaway TINYINT(1) NOT NULL DEFAULT 0;
+
+UPDATE products
+SET allow_dine_in=0, allow_takeaway=0;
+
+SET FOREIGN_KEY_CHECKS=1;
