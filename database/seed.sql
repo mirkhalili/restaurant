@@ -42,8 +42,8 @@ INSERT INTO products (name, price, status, created_at)
 SELECT 'نوشابه',30000,'active',NOW()
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name='نوشابه');
 
-INSERT INTO users (role_id,email,password_hash,status,created_at)
-SELECT id,'admin@example.com',
+INSERT INTO users (role_id,username,email,display_name,password_hash,status,created_at)
+SELECT id,'admin','admin@example.com','مدیر سیستم',
 '$2y$12$McvX49hKrZ3OpYWMj/t53.q0d3o8JJZzYC55CI4ztuoaiVCv9QN2q',
 'active',NOW()
 FROM roles
