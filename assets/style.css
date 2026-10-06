@@ -74,3 +74,16 @@ body.sidebar-collapsed .sidebar{width:76px}body.sidebar-collapsed .brand-copy,bo
 @media(max-width:900px){.pos-grid{grid-template-columns:1fr}.invoice-card{order:2}.pos-main{order:1}.product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){.product-head{align-items:stretch}.product-head .search-input{width:100%;min-width:0}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding-left:12px;padding-right:12px}.product-type-filters{padding-left:12px;padding-right:12px}.order-type-panel{margin-left:12px;margin-right:12px}.customer-selected-bar{margin-left:12px;margin-right:12px}}
 @media(max-width:420px){.product-grid{grid-template-columns:1fr 1fr;gap:7px}.product-card button{min-height:118px;padding:9px}.product-category-icon{width:28px;height:28px;font-size:16px}.order-type-btn{min-width:0;font-size:11px}.order-type-buttons{gap:6px}}
+
+
+/* v016.9.0.2: order-type defaults and Persian reports */
+.invoice-order-type{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 18px 12px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--surface2)}
+.invoice-order-type span{font-size:12px;color:var(--muted)}
+.invoice-order-type strong{font-size:14px;color:var(--primary)}
+.report-filter{padding:16px 18px}
+.report-filter .filters{display:flex;flex-wrap:wrap;align-items:end;gap:10px;width:100%}
+.report-filter label{min-width:170px;flex:1}
+.report-filter .btn{height:42px}
+.report-section .row-actions{white-space:nowrap}
+@media(max-width:700px){.report-filter .filters{display:grid;grid-template-columns:1fr 1fr}.report-filter label{min-width:0}.report-filter .btn{width:100%}}
+@media(max-width:480px){.report-filter .filters{grid-template-columns:1fr}.invoice-order-type{margin-left:12px;margin-right:12px}}
