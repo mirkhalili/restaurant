@@ -1,94 +1,20 @@
 <?php
 declare(strict_types=1);
-
-require __DIR__ . '/src/Core/Database.php';
-require __DIR__ . '/src/Core/Auth.php';
-require __DIR__ . '/src/Core/Router.php';
-require __DIR__ . '/src/Support/Response.php';
-require __DIR__ . '/src/Support/PersianDate.php';
-require __DIR__ . '/src/Support/PersianText.php';
-require __DIR__ . '/src/Http/Controllers/AuthController.php';
-require __DIR__ . '/src/Http/Controllers/DashboardController.php';
-require __DIR__ . '/src/Http/Controllers/CsvController.php';
-require __DIR__ . '/src/Http/Controllers/RestaurantController.php';
-require __DIR__ . '/src/Http/Controllers/CrudController.php';
-require __DIR__ . '/src/Http/Controllers/SettingsController.php';
-require __DIR__ . '/src/Http/Controllers/UsersController.php';
-
-$config = require __DIR__ . '/config/config.php';
-$db = App\Core\Database::get($config);
-App\Core\Auth::start($config);
-
-$page = App\Core\Router::page();
-
-if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/api/v1/')) {
-    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    if ($path === '/api/v1/health') App\Support\Response::json(['status'=>'ok','version'=>trim((string)file_get_contents(__DIR__.'/VERSION'))]);
-    if ($path === '/api/v1/customers/search') {
-        $q=(string)($_GET['q']??''); $items=[];
-        if(trim($q)!=='') { $like='%'.App\Support\PersianText::normalize($q).'%'; $phone=App\Support\PersianDate::latinDigits(trim($q)); $s=$db->prepare('SELECT id,name,phone,mobile,subscription_code,address FROM customers WHERE phone LIKE ? OR name LIKE ? OR first_name LIKE ? OR last_name LIKE ? ORDER BY (phone=?) DESC,id DESC LIMIT 8'); $s->execute(['%'.$phone.'%',$like,$like,$like,$phone]); $items=$s->fetchAll(); }
-        App\Support\Response::json(['items'=>$items]);
-    }
-    App\Support\Response::json(['error'=>'Not Found'],404);
-}
-
-if ($page === 'login') { App\Http\Controllers\AuthController::login($db); exit; }
-if ($page === 'logout') App\Http\Controllers\AuthController::logout();
-
-App\Core\Auth::requireLogin();
-$user = App\Core\Auth::user();
-
-if ($page === 'orders') {
-    $data = App\Http\Controllers\RestaurantController::page($db);
-    $title = 'ثبت سفارش و فاکتور';
-    $page = 'orders';
-    extract($data);
-    ob_start(); require __DIR__.'/views/orders.php'; $content=ob_get_clean();
-    require __DIR__.'/views/layout.php'; exit;
-}
-
-if ($page === 'customers') {
-    $data = App\Http\Controllers\CrudController::customers($db);
-    $title = 'مشتریان';
-    $page = 'customers';
-    extract($data);
-    ob_start(); require __DIR__.'/views/customers.php'; $content = ob_get_clean();
-    require __DIR__.'/views/layout.php'; exit;
-}
-
-if ($page === 'products') {
-    $data = App\Http\Controllers\CrudController::products($db);
-    $title = 'منو و محصولات';
-    $page = 'products';
-    extract($data);
-    ob_start(); require __DIR__.'/views/products.php'; $content = ob_get_clean();
-    require __DIR__.'/views/layout.php'; exit;
-}
-
-if ($page === 'settings') {
-    $data=App\Http\Controllers\SettingsController::categories($db); $title='تنظیمات'; extract($data);
-    ob_start(); require __DIR__.'/views/settings.php'; $content=ob_get_clean(); require __DIR__.'/views/layout.php'; exit;
-}
-
-if ($page === 'users') {
-    try { $data=App\Http\Controllers\UsersController::users($db); }
-    catch (\Throwable $e) { $data=['rows'=>[],'roles'=>[],'edit'=>null,'message'=>null,'error'=>$e->getMessage()]; }
-    $title='کاربران و دسترسی‌ها'; extract($data);
-    ob_start(); require __DIR__.'/views/users.php'; $content=ob_get_clean(); require __DIR__.'/views/layout.php'; exit;
-}
-
-if ($page === 'profile') {
-    $data=App\Http\Controllers\UsersController::profile($db); $title='پروفایل من'; extract($data);
-    ob_start(); require __DIR__.'/views/profile.php'; $content=ob_get_clean(); require __DIR__.'/views/layout.php'; exit;
-}
-
-if (in_array($page,['inventory','kitchen','reports','users','audit'],true)) {
-    ob_start(); require __DIR__.'/views/module-placeholder.php'; $content=ob_get_clean();
-    $title='ماژول'; require __DIR__.'/views/layout.php'; exit;
-} else {
-    $data=App\Http\Controllers\DashboardController::index($db);
-    ob_start(); extract($data); require __DIR__.'/views/dashboard.php'; $content=ob_get_clean();
-    $title='داشبورد'; require __DIR__.'/views/layout.php'; exit;
-}
-
-
+require __DIR__.'/src/Core/Database.php';require __DIR__.'/src/Core/Auth.php';require __DIR__.'/src/Core/Router.php';require __DIR__.'/src/Support/Response.php';require __DIR__.'/src/Support/PersianDate.php';require __DIR__.'/src/Support/PersianText.php';require __DIR__.'/src/Support/AuditLogger.php';
+require __DIR__.'/src/Http/Controllers/AuthController.php';require __DIR__.'/src/Http/Controllers/PasswordController.php';require __DIR__.'/src/Http/Controllers/DashboardController.php';require __DIR__.'/src/Http/Controllers/CsvController.php';require __DIR__.'/src/Http/Controllers/RestaurantController.php';require __DIR__.'/src/Http/Controllers/CrudController.php';require __DIR__.'/src/Http/Controllers/SettingsController.php';require __DIR__.'/src/Http/Controllers/UsersController.php';require __DIR__.'/src/Http/Controllers/ReportsController.php';require __DIR__.'/src/Http/Controllers/AuditController.php';require __DIR__.'/src/Http/Controllers/InvoiceController.php';require __DIR__.'/src/Http/Controllers/PrintController.php';
+$config=require __DIR__.'/config/config.php';$db=App\Core\Database::get($config);App\Core\Auth::start($config);$page=App\Core\Router::page();
+if(str_starts_with($_SERVER['REQUEST_URI']??'','/api/v1/')){$path=parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH);if($path==='/api/v1/health')App\Support\Response::json(['status'=>'ok','version'=>trim((string)file_get_contents(__DIR__.'/VERSION'))]);if($path==='/api/v1/customers/search'){$q=(string)($_GET['q']??'');$items=[];if(trim($q)!==''){$like='%'.App\Support\PersianText::normalize($q).'%';$phone=App\Support\PersianDate::latinDigits(trim($q));$s=$db->prepare('SELECT id,name,phone,mobile,subscription_code,address FROM customers WHERE phone LIKE ? OR name LIKE ? OR first_name LIKE ? OR last_name LIKE ? ORDER BY (phone=?) DESC,id DESC LIMIT 8');$s->execute(['%'.$phone.'%',$like,$like,$like,$phone]);$items=$s->fetchAll();}App\Support\Response::json(['items'=>$items]);}App\Support\Response::json(['error'=>'Not Found'],404);}
+if($page==='login'){App\Http\Controllers\AuthController::login($db);exit;}if($page==='forgot-password'){require __DIR__.'/views/forgot-password.php';$data=App\Http\Controllers\PasswordController::forgot($db);exit;}if($page==='reset-password'){$data=App\Http\Controllers\PasswordController::reset($db);extract($data);require __DIR__.'/views/reset-password.php';exit;}if($page==='logout'){App\Http\Controllers\AuthController::logout($db);exit;}
+App\Core\Auth::requireLogin();$user=App\Core\Auth::user();
+if($page==='orders'){$data=App\Http\Controllers\RestaurantController::page($db);$title='ثبت سفارش و فاکتور';$page='orders';extract($data);ob_start();require __DIR__.'/views/orders.php';$content=ob_get_clean();require __DIR__.'/views/layout.php';exit;}
+if($page==='customers'){$data=App\Http\Controllers\CrudController::customers($db);$title='مشتریان';$page='customers';extract($data);ob_start();require __DIR__.'/views/customers.php';$content=ob_get_clean();require __DIR__.'/views/layout.php';exit;}
+if($page==='products'){$data=App\Http\Controllers\CrudController::products($db);$title='منو و محصولات';$page='products';extract($data);ob_start();require __DIR__.'/views/products.php';$content=ob_get_clean();require __DIR__.'/views/layout.php';exit;}
+if($page==='settings'){$data=App\Http\Controllers\SettingsController::index($db);$title='تنظیمات';$page='settings';extract($data);ob_start();require __DIR__.'/views/settings.php';$content=ob_get_clean();require __DIR__.'/views/layout.php';exit;}
+if($page==='users'){$data=App\Http\Controllers\UsersController::users($db);$title='کاربران و دسترسی‌ها';$page='users';extract($data);ob_start();require __DIR__.'/views/users.php';$content=ob_get_clean();require __DIR__.'/views/layout.php';exit;}
+if($page==='profile'){$data=App\Http\Controllers\UsersController::profile($db);$title='پروفایل من';$page='profile';extract($data);ob_start();require __DIR__.'/views/profile.php';$content=ob_get_clean();require __DIR__.'/views/layout.php';exit;}
+if($page==='reports'){$data=App\Http\Controllers\ReportsController::index($db);$title='گزارشات';$page='reports';extract($data);ob_start();require __DIR__.'/views/reports.php';$content=ob_get_clean();require __DIR__.'/views/layout.php';exit;}
+if($page==='audit'){$data=App\Http\Controllers\AuditController::index($db);$title='رویدادنگاری';$page='audit';extract($data);ob_start();require __DIR__.'/views/audit.php';$content=ob_get_clean();require __DIR__.'/views/layout.php';exit;}
+if($page==='invoice'){$data=App\Http\Controllers\InvoiceController::index($db);$title='ویرایش فاکتور';$page='invoice';extract($data);ob_start();require __DIR__.'/views/invoice.php';$content=ob_get_clean();require __DIR__.'/views/layout.php';exit;}
+if($page==='print'){$data=App\Http\Controllers\PrintController::receipt($db);extract($data);require __DIR__.'/views/print.php';exit;}
+if(in_array($page,['inventory','kitchen'],true)){ob_start();require __DIR__.'/views/module-placeholder.php';$content=ob_get_clean();$title='ماژول';require __DIR__.'/views/layout.php';exit;}
+$data=App\Http\Controllers\DashboardController::index($db);extract($data);ob_start();require __DIR__.'/views/dashboard.php';$content=ob_get_clean();$title='داشبورد';require __DIR__.'/views/layout.php';
