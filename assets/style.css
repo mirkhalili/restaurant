@@ -119,3 +119,6 @@ body.sidebar-collapsed .sidebar{width:76px}body.sidebar-collapsed .brand-copy,bo
 .product-type-filters .type-filter::before{content:'';position:absolute;right:0;top:0;bottom:0;width:4px;background:var(--filter-color,var(--primary));opacity:.9}
 .product-type-filters .type-filter.active{background:color-mix(in srgb,var(--filter-color,var(--primary)) 14%,var(--surface));border-color:var(--filter-color,var(--primary));color:var(--text);box-shadow:0 0 0 2px color-mix(in srgb,var(--filter-color,var(--primary)) 12%,transparent)}
 .product-card button{border-top:4px solid var(--card-type-color,var(--line));}
+
+/* v019.9.0.5: kitchen receipt settings */
+.kitchen-print-settings{margin-top:16px}.kitchen-print-settings .form-grid{padding:20px}.kitchen-print-settings .card-head{padding:18px;border-bottom:1px solid var(--line)}
