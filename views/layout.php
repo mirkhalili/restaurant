@@ -15,7 +15,7 @@ $navGroups = [
     ['key'=>'reports','label'=>'گزارش‌ها','icon'=>'◫','url'=>'/?page=reports'],
     ['key'=>'users','label'=>'کاربران و دسترسی‌ها','icon'=>'♟','url'=>'/?page=users'],
     ['key'=>'settings','label'=>'تنظیمات','icon'=>'⚙','url'=>'/?page=settings'],
-    ['key'=>'audit','label'=>'Audit Log','icon'=>'◌','url'=>'/?page=audit'],
+    ['key'=>'audit','label'=>'رویدادنگاری','icon'=>'◌','url'=>'/?page=audit'],
   ]]
 ];
 ?>
@@ -69,10 +69,10 @@ $navGroups = [
         <label class="global-search"><span>⌕</span><input data-global-search type="search" placeholder="جستجوی سریع..."><kbd>Ctrl K</kbd></label>
         <button class="icon-btn" data-theme-toggle aria-label="تغییر پوسته">☾</button>
         <button class="icon-btn notification" aria-label="اعلان‌ها">♢<i></i></button>
-        <div class="user-menu">
-          <div class="avatar"><?=htmlspecialchars(mb_substr($user['email']??'م',0,1))?></div>
-          <div class="user-info"><strong><?=htmlspecialchars($user['email']??'کاربر')?></strong><small><?=htmlspecialchars($user['role_name']??'کاربر')?></small></div>
-        </div>
+        <a class="user-menu user-menu-link" href="/?page=profile" title="پروفایل من">
+          <div class="avatar"><?=htmlspecialchars(mb_substr($user['display_name']??$user['email']??'م',0,1))?></div>
+          <div class="user-info"><strong><?=htmlspecialchars($user['display_name']??$user['email']??'کاربر')?></strong><small><?=htmlspecialchars($user['role_name']??'کاربر')?></small></div>
+        </a>
       </div>
     </header>
     <main class="page-content"><?=$content?></main>
