@@ -34,7 +34,7 @@ final class InvoiceController
 
     public static function recent(PDO $db): array
     {
-        return $db->query("SELECT i.id,i.invoice_no,i.total_amount,i.created_at,o.order_no,o.payment_method,o.status,
+        return $db->query("SELECT i.id,i.invoice_no,i.total_amount,i.created_at,o.order_no,o.order_type,o.payment_method,o.status,
                                   COALESCE(c.name,o.customer_phone,'بدون مشتری') customer_name
                            FROM invoices i JOIN orders o ON o.id=i.order_id
                            LEFT JOIN customers c ON c.id=o.customer_id
