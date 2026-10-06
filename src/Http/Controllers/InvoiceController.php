@@ -42,6 +42,7 @@ final class InvoiceController
         try{
             $s=$db->prepare("SELECT payment_no,method,amount FROM payments WHERE invoice_id=?");$s->execute([$invoiceId]);$payments=$s->fetchAll();
             $s=$db->prepare("SELECT product_id,quantity,unit_price,line_total FROM order_items WHERE order_id=?");$s->execute([(int)$invoice['order_id']);$items=$s->fetchAll();
+            $db->prepare('DELETE FROM print_jobs WHERE invoice_id=?')->execute([$invoiceId]);
             $db->prepare('DELETE FROM payments WHERE invoice_id=?')->execute([$invoiceId]);
             $db->prepare('DELETE FROM invoices WHERE id=?')->execute([$invoiceId]);
             $db->prepare('DELETE FROM order_items WHERE order_id=?')->execute([(int)$invoice['order_id']]);
