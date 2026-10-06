@@ -47,9 +47,9 @@ CREATE TABLE IF NOT EXISTS print_jobs (
 
 INSERT INTO settings(scope,setting_key,setting_value) VALUES
 ('print','paper_width','"80mm"'),
-('print','show_logo','"1'),('print','show_address','"1'),('print','show_phone','"1'),
-('print','show_customer','"1'),('print','show_invoice_no','"1'),('print','show_date','"1'),
-('print','show_payment','"1'),('print','show_footer','"1'),('print','footer_text','"از خرید شما سپاسگزاریم"'),
+('print','show_logo','"1"'),('print','show_address','"1"'),('print','show_phone','"1"'),
+('print','show_customer','"1"'),('print','show_invoice_no','"1"'),('print','show_date','"1"'),
+('print','show_payment','"1"'),('print','show_footer','"1"'),('print','footer_text','"از خرید شما سپاسگزاریم"'),
 ('print','feed','"3"'),('print','cut','"1"')
 ON DUPLICATE KEY UPDATE setting_key=VALUES(setting_key);
 
