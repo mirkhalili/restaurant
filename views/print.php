@@ -107,6 +107,6 @@ document.getElementById('direct-print-btn').addEventListener('click',directPrint
 document.getElementById('browser-print-btn').addEventListener('click',()=>window.print());
 
 const kg=document.getElementById('kitchen-groups');
-kg.innerHTML=groups().map(([type,list])=>'<section><strong>'+esc(list[0]?.category_icon||'•')+' '+esc(type)+'</strong>'+list.map(it=>'<div><span>'+esc(it.name)+'</span><b>'+esc(it.quantity)+'</b></div>').join('')+'</section>').join('');
+kg.innerHTML=groups().map(([type,list])=>'<section><strong>'+esc(list[0]?.category_icon||'•')+' '+esc(type)+'</strong>'+list.map(it=>'<div><span>'+esc(it.name)+'</span><b>'+Math.trunc(Number(it.quantity||0)).toLocaleString('fa-IR')+'</b></div>').join('')+'</section>').join('');
 </script>
 </body></html>
