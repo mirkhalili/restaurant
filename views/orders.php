@@ -45,9 +45,9 @@
   </div>
 
   <div class="product-type-filters" data-type-filters>
-    <button type="button" class="type-filter active" data-type="all"><span>همه</span></button>
+    <button type="button" class="type-filter <?=($selectedType??'all')==='all'?'active':''?>" data-type="all"><span>همه</span></button>
     <?php foreach($productTypes as $t): ?>
-      <button type="button" class="type-filter" data-type="<?=htmlspecialchars($t['name'])?>" style="--filter-color:<?=htmlspecialchars($t['color'])?>"><span><?=htmlspecialchars($t['name'])?></span></button>
+      <button type="button" class="type-filter <?=($selectedType??'all')===$t['name']?'active':''?>" data-type="<?=htmlspecialchars($t['name'])?>" style="--filter-color:<?=htmlspecialchars($t['color'])?>"><span><?=htmlspecialchars($t['name'])?></span></button>
     <?php endforeach; ?>
   </div>
 
@@ -55,7 +55,7 @@
     <?php foreach($products as $p): ?>
       <form class="product-card" method="post" data-product data-type="<?=htmlspecialchars($p['category_name']??$p['product_type']??'')?>" style="--card-type-color:<?=htmlspecialchars($p['category_color']??'var(--line)')?>">
         <input type="hidden" name="action" value="add_item">
-        <input type="hidden" name="product_id" value="<?=$p['id']?>">
+        <input type="hidden" name="product_id" value="<?=$p['id']?>"><input type="hidden" name="selected_type" value="<?=htmlspecialchars($selectedType??'all')?>">
         <button type="submit">
           <span class="product-type"><?=htmlspecialchars($p['category_name']??$p['product_type']??'بدون نوع')?></span>
           <strong><?=htmlspecialchars($p['name'])?></strong>
@@ -119,5 +119,5 @@
 
 <script>
 (()=>{const input=document.getElementById('customer-live-search'),box=document.getElementById('customer-suggestions'),status=document.getElementById('customer-search-status');if(!input||!box)return;let timer;const normalize=s=>s.replace(/[يى]/g,'ی').replace(/ك/g,'ک');input.addEventListener('input',()=>{clearTimeout(timer);const q=normalize(input.value.trim());if(q.length<2){box.hidden=true;status.textContent='حداقل دو حرف یا رقم وارد کنید';return}status.textContent='در حال جستجو…';timer=setTimeout(()=>fetch('/api/v1/customers/search?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>{box.innerHTML='';if(!d.items.length){box.hidden=true;status.textContent='مشتری پیدا نشد';return}d.items.forEach(c=>{const a=document.createElement('button');a.type='button';a.className='customer-suggestion';a.innerHTML='<strong>'+c.name+'</strong><small>'+c.phone+(c.mobile?' · '+c.mobile:'')+'</small>';a.addEventListener('click',()=>location.href='/?page=orders&phone='+encodeURIComponent(c.phone));box.appendChild(a)});box.hidden=false;status.textContent=d.items.length+' مشتری پیدا شد'}).catch(()=>status.textContent='خطا در جستجو'),220)});document.addEventListener('click',e=>{if(!box.contains(e.target)&&e.target!==input)box.hidden=true})})();
-const search=document.querySelector('[data-product-search]');let selectedType='all';function filterProducts(){const q=(search?.value||'').trim().toLowerCase();document.querySelectorAll('[data-product]').forEach(x=>{const okType=selectedType==='all'||x.dataset.type===selectedType;const okSearch=!q||x.textContent.toLowerCase().includes(q);x.hidden=!(okType&&okSearch);});}search?.addEventListener('input',filterProducts);document.querySelectorAll('[data-type-filters] .type-filter').forEach(b=>b.addEventListener('click',()=>{selectedType=b.dataset.type;document.querySelectorAll('[data-type-filters] .type-filter').forEach(x=>x.classList.toggle('active',x===b));filterProducts();}));
+const search=document.querySelector('[data-product-search]');let selectedType=<?=json_encode((string)($selectedType??'all'),JSON_UNESCAPED_UNICODE)?>;function filterProducts(){const q=(search?.value||'').trim().toLowerCase();document.querySelectorAll('[data-product]').forEach(x=>{const okType=selectedType==='all'||x.dataset.type===selectedType;const okSearch=!q||x.textContent.toLowerCase().includes(q);x.hidden=!(okType&&okSearch);});}search?.addEventListener('input',filterProducts);document.querySelectorAll('[data-type-filters] .type-filter').forEach(b=>b.addEventListener('click',()=>{selectedType=b.dataset.type;document.querySelectorAll('input[name="selected_type"]').forEach(x=>x.value=selectedType);document.querySelectorAll('[data-type-filters] .type-filter').forEach(x=>x.classList.toggle('active',x===b));filterProducts();}));filterProducts();
 </script>
