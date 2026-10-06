@@ -20,12 +20,17 @@ final class PrintController
         $s=$db->prepare("SELECT oi.quantity,oi.unit_price,oi.line_total,p.name,p.unit FROM order_items oi JOIN products p ON p.id=oi.product_id WHERE oi.order_id=? ORDER BY oi.id");
         $s->execute([(int)$invoice['order_id']]);$items=$s->fetchAll();
         $printers=$db->query("SELECT * FROM printers WHERE status='active' ORDER BY is_default DESC,name")->fetchAll();
-        $settings=self::settings($db);
+        $settings=self::settings($db);$restaurant=self::restaurant($db);
         if($_SERVER['REQUEST_METHOD']==='POST' && ($_POST['action']??'')==='print_receipt'){
             AuditLogger::log($db,'چاپ فیش','invoice',(int)$invoice['id'],null,['printer_id'=>(int)($_POST['printer_id']??0),'width'=>$settings['paper_width']??'80mm']);
             $message='فیش برای چاپ آماده شد. در مرحله چاپ مرورگر، چاپگر انتخاب‌شده را انتخاب/تأیید کنید.';
         } else $message=null;
-        return compact('invoice','items','printers','settings','message');
+        return compact('invoice','items','printers','settings','restaurant','message');
+    }
+
+    private static function restaurant(PDO $db): array
+    {
+        $s=$db->query('SELECT * FROM restaurant_profile WHERE id=1');return $s->fetch()?:['name'=>'رستوران','address'=>'','phone'=>'','logo_path'=>''];
     }
 
     public static function settings(PDO $db): array
