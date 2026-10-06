@@ -32,6 +32,27 @@ final class InvoiceController
         return compact('invoice','items','products','message','error');
     }
 
+    public static function delete(PDO $db,int $invoiceId): void
+    {
+        if($invoiceId<1) throw new \RuntimeException('فاکتور نامعتبر است.');
+        $s=$db->prepare("SELECT i.*,o.id order_id,o.order_no,o.customer_id,o.total_amount FROM invoices i JOIN orders o ON o.id=i.order_id WHERE i.id=? LIMIT 1");
+        $s->execute([$invoiceId]);$invoice=$s->fetch();
+        if(!$invoice) throw new \RuntimeException('فاکتور پیدا نشد.');
+        $db->beginTransaction();
+        try{
+            $s=$db->prepare("SELECT payment_no,method,amount FROM payments WHERE invoice_id=?");$s->execute([$invoiceId]);$payments=$s->fetchAll();
+            $s=$db->prepare("SELECT product_id,quantity,unit_price,line_total FROM order_items WHERE order_id=?");$s->execute([(int)$invoice['order_id']);$items=$s->fetchAll();
+            $db->prepare('DELETE FROM payments WHERE invoice_id=?')->execute([$invoiceId]);
+            $db->prepare('DELETE FROM invoices WHERE id=?')->execute([$invoiceId]);
+            $db->prepare('DELETE FROM order_items WHERE order_id=?')->execute([(int)$invoice['order_id']]);
+            $db->prepare('DELETE FROM orders WHERE id=?')->execute([(int)$invoice['order_id']]);
+            AuditLogger::log($db,'حذف فاکتور','invoice',$invoiceId,
+                ['invoice_no'=>$invoice['invoice_no'],'order_id'=>$invoice['order_id'],'total_amount'=>$invoice['total_amount'],'items'=>$items,'payments'=>$payments],
+                ['deleted'=>true]);
+            $db->commit();
+        }catch(\Throwable $e){$db->rollBack();throw $e;}
+    }
+
     public static function recent(PDO $db): array
     {
         return $db->query("SELECT i.id,i.invoice_no,i.total_amount,i.created_at,o.order_no,o.order_type,o.payment_method,o.status,
