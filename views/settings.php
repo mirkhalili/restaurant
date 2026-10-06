@@ -10,7 +10,7 @@
 <div class="form-actions"><button class="btn btn-primary">ذخیره تنظیمات فیش</button></div>
 </div></form>
 <section class="card form-card kitchen-print-settings"><div class="card-head"><div><h2>تنظیمات فیش آشپزخانه</h2><small>عنوان، اطلاعات سفارش و متن پایانی فیش آشپزخانه را مستقل از فیش مشتری تنظیم کنید.</small></div></div>
-<form method="post" class="form-grid"><input type="hidden" name="action" value="save_print"><input type="hidden" name="tab" value="print">
+<form method="post" class="form-grid"><input type="hidden" name="action" value="save_kitchen_print"><input type="hidden" name="tab" value="print">
 <label>عنوان فیش آشپزخانه<input name="kitchen_title" value="<?=htmlspecialchars($print['kitchen_title']??'آشپزخانه کوچک')?>"></label>
 <?php foreach(['kitchen_show_restaurant'=>'نام رستوران','kitchen_show_order_type'=>'نوع سفارش','kitchen_show_customer'=>'نام مشتری','kitchen_show_invoice_no'=>'شماره فاکتور','kitchen_show_date'=>'تاریخ','kitchen_show_product_type'=>'گروه‌بندی نوع محصول'] as $k=>$label): ?><label class="check-setting"><input type="checkbox" name="<?=$k?>" value="1" <?=($print[$k]??'1')==='1'?'checked':''?>> <?=$label?></label><?php endforeach; ?>
 <label style="grid-column:1/-1">متن پایانی فیش آشپزخانه<textarea name="kitchen_footer" rows="2"><?=htmlspecialchars($print['kitchen_footer']??'مخصوص آشپزخانه — بدون قیمت')?></textarea></label>
