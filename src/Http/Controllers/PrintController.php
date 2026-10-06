@@ -17,15 +17,16 @@ final class PrintController
                          LEFT JOIN customers c ON c.id=o.customer_id WHERE i.invoice_no=? LIMIT 1");
         $s->execute([$invoiceNo]);$invoice=$s->fetch();
         if(!$invoice) throw new \RuntimeException('فاکتور برای چاپ پیدا نشد.');
-        $s=$db->prepare("SELECT oi.quantity,oi.unit_price,oi.line_total,p.name,p.unit FROM order_items oi JOIN products p ON p.id=oi.product_id WHERE oi.order_id=? ORDER BY oi.id");
+        $s=$db->prepare("SELECT oi.quantity,oi.unit_price,oi.line_total,p.name,p.unit,p.product_type FROM order_items oi JOIN products p ON p.id=oi.product_id WHERE oi.order_id=? ORDER BY p.product_type,oi.id");
         $s->execute([(int)$invoice['order_id']]);$items=$s->fetchAll();
         $printers=$db->query("SELECT * FROM printers WHERE status='active' ORDER BY is_default DESC,name")->fetchAll();
+        $kitchenPrinters=$db->query("SELECT * FROM printers WHERE status='active' AND printer_type='kitchen' ORDER BY is_default DESC,name")->fetchAll();
         $settings=self::settings($db);$restaurant=self::restaurant($db);
-        if($_SERVER['REQUEST_METHOD']==='POST' && ($_POST['action']??'')==='print_receipt'){
+        if($_SERVER['REQUEST_METHOD']==='POST' && in_array(($_POST['action']??''),['print_receipt','mark_printed'],true)){
             AuditLogger::log($db,'چاپ فیش','invoice',(int)$invoice['id'],null,['printer_id'=>(int)($_POST['printer_id']??0),'width'=>$settings['paper_width']??'80mm']);
-            $message='فیش برای چاپ آماده شد. در مرحله چاپ مرورگر، چاپگر انتخاب‌شده را انتخاب/تأیید کنید.';
+            $message='چاپ مستقیم آماده است.';
         } else $message=null;
-        return compact('invoice','items','printers','settings','restaurant','message');
+        return compact('invoice','items','printers','kitchenPrinters','settings','restaurant','message');
     }
 
     private static function restaurant(PDO $db): array
