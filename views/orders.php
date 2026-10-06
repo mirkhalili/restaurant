@@ -53,7 +53,7 @@
 
   <div class="product-grid" data-products>
     <?php foreach($products as $p): ?>
-      <form class="product-card" method="post" data-product data-type="<?=htmlspecialchars($p['category_name']??$p['product_type']??'')?>">
+      <form class="product-card" method="post" data-product data-type="<?=htmlspecialchars($p['category_name']??$p['product_type']??'')?>" style="--card-type-color:<?=htmlspecialchars($p['category_color']??'var(--line)')?>">
         <input type="hidden" name="action" value="add_item">
         <input type="hidden" name="product_id" value="<?=$p['id']?>">
         <button type="submit">
