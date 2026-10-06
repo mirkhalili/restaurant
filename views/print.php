@@ -26,11 +26,11 @@
   <hr>
   <div class="receipt-line"><span>فاکتور</span><b><?=htmlspecialchars($invoice['invoice_no'])?></b></div>
   <div class="receipt-line"><span>تاریخ</span><span><?=htmlspecialchars(App\Support\PersianDate::format($invoice['created_at']))?></span></div>
-  <div class="receipt-line receipt-order-type"><span>سفارش</span><strong><?=htmlspecialchars($invoice['order_type']??'سالن')?></strong></div>
+  <div class="receipt-line receipt-order-type"><span>سفارش</span><strong><?=($settings['kitchen_show_order_type']??'1')==='1'?htmlspecialchars($invoice['order_type']??'سالن'):''?></strong></div>
   <?php if(($settings['show_customer']??'1')==='1'): ?><div class="receipt-line"><span>مشتری</span><span><?=htmlspecialchars($invoice['customer_name'])?></span></div><?php endif; ?>
   <hr>
   <?php foreach($items as $it): ?>
-    <div class="receipt-item"><div><b><?=htmlspecialchars($it['name'])?></b><small><?=number_format($it['unit_price'])?> × <?=htmlspecialchars($it['quantity'])?></small></div><strong><?=number_format($it['line_total'])?></strong></div>
+    <div class="receipt-item"><div><b><?=htmlspecialchars($it['name'])?></b><small><?=number_format($it['unit_price'])?> × <?=htmlspecialchars((string)(int)$it['quantity'])?></small></div><strong><?=number_format($it['line_total'])?></strong></div>
   <?php endforeach; ?>
   <hr>
   <div class="receipt-total"><span>مبلغ نهایی</span><strong><?=number_format($invoice['total_amount'])?> ریال</strong></div>
@@ -39,7 +39,7 @@
 </main>
 
 <div id="kitchen-preview" class="kitchen-slip no-print">
-  <header><strong><?=htmlspecialchars($settings['kitchen_title']??'آشپزخانه کوچک')?></strong><div class="kitchen-order-type"><?=htmlspecialchars($invoice['order_type']??'سالن')?></div><small><?=htmlspecialchars($invoice['invoice_no'])?></small></header>
+  <header><strong><?=htmlspecialchars($settings['kitchen_title']??'آشپزخانه کوچک')?></strong><div class="kitchen-order-type"><?=htmlspecialchars($invoice['order_type']??'سالن')?></div><small><?=($settings['kitchen_show_invoice_no']??'1')==='1'?htmlspecialchars($invoice['invoice_no']):''?></small></header>
   <div id="kitchen-groups"></div>
 </div>
 
