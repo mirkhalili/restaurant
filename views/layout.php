@@ -15,7 +15,7 @@ $navGroups = [
     ['key'=>'reports','label'=>'گزارش‌ها','icon'=>'◫','url'=>'/?page=reports'],
     ['key'=>'users','label'=>'کاربران و دسترسی‌ها','icon'=>'♟','url'=>'/?page=users'],
     ['key'=>'settings','label'=>'تنظیمات','icon'=>'⚙','url'=>'/?page=settings'],
-    ['key'=>'audit','label'=>'Audit Log','icon'=>'◌','url'=>'/?page=audit'],
+    ['key'=>'audit','label'=>'رویدادنگاری','icon'=>'◌','url'=>'/?page=audit'],
   ]]
 ];
 ?>
