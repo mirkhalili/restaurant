@@ -22,4 +22,7 @@ return [
         'name' => 'restaurant_session',
         'secure' => true,
     ],
+    'mail' => [
+        'from' => 'no-reply@example.com',
+    ],
 ];
