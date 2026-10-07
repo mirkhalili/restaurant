@@ -13,8 +13,9 @@ final class RestaurantController{
    case'add_item':if(!$customer)throw new \RuntimeException('ابتدا مشتری را انتخاب کنید.');self::setSelectedProductType();self::addItem();break;
    case'remove_item':self::setSelectedProductType();self::decrementItem();break;
    case'clear_cart':self::setSelectedProductType();self::clearCart();self::setDiscount('0');self::forgetActiveDraft();$message='فاکتور فعلی خالی شد.';break;
-   case'new_order':self::forgetActiveDraft();$orderType=self::orderType($db);$message='فاکتور جدید آماده شد.';break;
+   case'new_order':self::forgetActiveDraft();$customer=null;$phone='';$orderType=self::orderType($db);$message='فاکتور جدید آماده شد.';break;
    case'load_draft':$draftId=(int)($_POST['draft_id']??0);if($draftId<1)throw new \RuntimeException('فاکتور در دست اقدام نامعتبر است.');$draft=self::findDraft($db,$draftId);if(!$draft)throw new \RuntimeException('فاکتور در دست اقدام پیدا نشد.');self::loadDraft($db,$draft);$orderType=$draft['order_type'];$message='فاکتور در دست اقدام بارگذاری شد.';break;
+   case'delete_draft':$draftId=(int)($_POST['draft_id']??0);self::deleteDraft($db,$draftId);$message='فاکتور در دست اقدام حذف شد.';break;
    case'set_order_type':$orderType=self::setOrderType($db);self::applyDefaultProducts($db,$orderType);$message='نوع سفارش تغییر کرد و اقلام قبلی حفظ شدند.';break;
    case'apply_discount':self::setDiscount((string)($_POST['discount_percent']??'0'));$message='تخفیف اعمال شد.';break;
    case'save_draft':self::setDiscount((string)($_POST['discount_percent']??'0'));$message='فاکتور در دست اقدام ذخیره شد.';break;
@@ -61,6 +62,11 @@ final class RestaurantController{
  }
  private static function findDraft(PDO $db,int $draftId):?array{
   $userId=(int)(Auth::user()['id']??0);if($userId<1)return null;$s=$db->prepare("SELECT * FROM orders WHERE id=? AND created_by=? AND status='draft' LIMIT 1");$s->execute([$draftId,$userId]);return$s->fetch()?:null;
+ }
+ private static function deleteDraft(PDO $db,int $draftId):void{
+  $userId=(int)(Auth::user()['id']??0);if($userId<1||$draftId<1)throw new \RuntimeException('فاکتور نامعتبر است.');
+  $s=$db->prepare("SELECT id FROM orders WHERE id=? AND created_by=? AND status='draft' LIMIT 1");$s->execute([$draftId,$userId]);if(!$s->fetch())throw new \RuntimeException('فاکتور در دست اقدام پیدا نشد.');
+  $db->beginTransaction();try{$db->prepare('DELETE FROM order_items WHERE order_id=?')->execute([$draftId]);$db->prepare("DELETE FROM orders WHERE id=? AND created_by=? AND status='draft'")->execute([$draftId,$userId]);$db->commit();if((int)($_SESSION['order_draft_id']??0)===$draftId)self::forgetActiveDraft();}catch(\Throwable $e){$db->rollBack();throw$e;}
  }
  private static function pendingDrafts(PDO $db):array{
   $userId=(int)(Auth::user()['id']??0);if($userId<1)return[];$s=$db->prepare("SELECT o.id,o.order_no,o.order_type,o.customer_phone,o.subtotal_amount,o.discount_percent,o.discount_amount,o.total_amount,o.updated_at,o.created_at,COALESCE(c.name,o.customer_phone,'بدون مشتری') customer_name,(SELECT COUNT(*) FROM order_items oi WHERE oi.order_id=o.id) item_count FROM orders o LEFT JOIN customers c ON c.id=o.customer_id WHERE o.created_by=? AND o.status='draft' ORDER BY COALESCE(o.updated_at,o.created_at) DESC,o.id DESC");$s->execute([$userId]);return$s->fetchAll();
