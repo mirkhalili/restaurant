@@ -80,6 +80,6 @@ $navGroups = [
     <main class="page-content"><?=$content?></main>
   </section>
 </div>
-<script src="/assets/app.js"></script>
+<script src="/assets/app.js?v=022.13.0.0"></script>
 </body>
 </html>

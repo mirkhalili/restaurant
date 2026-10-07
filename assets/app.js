@@ -1,7 +1,11 @@
 (()=>{const root=document.documentElement,sidebar=document.querySelector('[data-sidebar]'),backdrop=document.querySelector('[data-sidebar-backdrop]');
-const saved=localStorage.getItem('restaurant-theme');const prefers=matchMedia('(prefers-color-scheme: dark)').matches;
-root.dataset.theme=saved|| (prefers?'dark':'light');
-document.querySelector('[data-theme-toggle]')?.addEventListener('click',()=>{const next=root.dataset.theme==='dark'?'light':'dark';root.dataset.theme=next;localStorage.setItem('restaurant-theme',next)});
+const themeButton=document.querySelector('[data-theme-toggle]');
+let saved=null;try{saved=localStorage.getItem('restaurant-theme')}catch(e){}
+const prefers=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+const applyTheme=theme=>{const next=theme==='dark'?'dark':'light';root.dataset.theme=next;if(themeButton){themeButton.textContent=next==='dark'?'☀':'☾';themeButton.setAttribute('aria-label',next==='dark'?'فعال‌کردن حالت روز':'فعال‌کردن حالت شب');themeButton.setAttribute('title',next==='dark'?'حالت روز':'حالت شب');}};
+applyTheme(saved||(prefers?'dark':'light'));
+const toggleTheme=()=>{const next=root.dataset.theme==='dark'?'light':'dark';applyTheme(next);try{localStorage.setItem('restaurant-theme',next)}catch(e){}};
+if(themeButton)themeButton.addEventListener('click',toggleTheme);
 const open=()=>{sidebar?.classList.add('open');backdrop?.classList.add('show')};const close=()=>{sidebar?.classList.remove('open');backdrop?.classList.remove('show')};
 document.querySelector('[data-sidebar-open]')?.addEventListener('click',open);backdrop?.addEventListener('click',close);
 document.querySelector('[data-sidebar-collapse]')?.addEventListener('click',()=>document.body.classList.toggle('sidebar-collapsed'));
