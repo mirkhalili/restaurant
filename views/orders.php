@@ -1,27 +1,6 @@
 <section class="page-head"><div><div class="eyebrow">POS / فروش</div><h1>ثبت سفارش و صدور فاکتور</h1><p>مشتری را انتخاب کنید، سپس محصولات را به پیش‌فاکتور اضافه کنید.</p></div></section>
 <?php if(!empty($message)): ?><div class="alert success"><?=htmlspecialchars($message)?></div><?php endif; ?>
 <?php if(!empty($error)): ?><div class="alert"><?=htmlspecialchars($error)?></div><?php endif; ?>
-<?php if(!empty($pendingDrafts)): ?>
-<section class="card pending-invoices">
-  <div class="card-head">
-    <div><h2>فاکتورهای در دست اقدام</h2><small>فاکتورهای ذخیره‌شده تا زمان نهایی‌شدن باقی می‌مانند.</small></div>
-    <form method="post"><input type="hidden" name="action" value="new_order"><button class="btn btn-primary" type="submit">＋ فاکتور جدید</button></form>
-  </div>
-  <div class="pending-invoice-grid">
-    <?php foreach($pendingDrafts as $draft): ?>
-      <article class="pending-invoice">
-        <div class="pending-invoice-head"><strong><?=htmlspecialchars($draft['customer_name'])?></strong><span><?=htmlspecialchars($draft['order_type'])?></span></div>
-        <div class="pending-invoice-meta"><span><?=htmlspecialchars((string)$draft['item_count'])?> قلم</span><span>تخفیف <?=number_format((float)$draft['discount_percent'],2)?>٪</span><strong><?=number_format((float)$draft['total_amount'])?> ریال</strong></div>
-        <small>آخرین تغییر: <?=htmlspecialchars(App\Support\PersianDate::format($draft['updated_at']?:$draft['created_at']))?></small>
-        <form method="post"><input type="hidden" name="action" value="load_draft"><input type="hidden" name="draft_id" value="<?=htmlspecialchars((string)$draft['id'])?>"><button class="btn" type="submit">باز کردن فاکتور</button></form>
-      </article>
-    <?php endforeach; ?>
-  </div>
-</section>
-<?php else: ?>
-<section class="card pending-empty"><div><strong>فاکتور در دست اقدامی وجود ندارد</strong><small>برای شروع، یک فاکتور جدید ایجاد کنید.</small></div><form method="post"><input type="hidden" name="action" value="new_order"><button class="btn btn-primary" type="submit">＋ فاکتور جدید</button></form></section>
-<?php endif; ?>
-
 <div class="pos-grid">
 <section class="card pos-main">
 <?php if(!$customer): ?>
@@ -151,6 +130,30 @@
   <form method="post"><input type="hidden" name="action" value="new_order"><button class="btn clear-btn" type="submit">فاکتور جدید</button></form>
 </aside>
 </div>
+
+<?php if(!empty($pendingDrafts)): ?>
+<section class="card pending-invoices pending-invoices-bottom">
+  <div class="card-head">
+    <div><h2>فاکتورهای در دست اقدام</h2><small>فاکتورهای ذخیره‌شده تا زمان نهایی‌شدن باقی می‌مانند.</small></div>
+    <form method="post"><input type="hidden" name="action" value="new_order"><button class="btn btn-primary" type="submit">＋ فاکتور جدید</button></form>
+  </div>
+  <div class="pending-invoice-grid">
+    <?php foreach($pendingDrafts as $draft): ?>
+      <article class="pending-invoice">
+        <div class="pending-invoice-head"><strong><?=htmlspecialchars($draft['customer_name'])?></strong><span><?=htmlspecialchars($draft['order_type'])?></span></div>
+        <div class="pending-invoice-meta"><span><?=htmlspecialchars((string)$draft['item_count'])?> قلم</span><span>تخفیف <?=number_format((float)$draft['discount_percent'],2)?>٪</span><strong><?=number_format((float)$draft['total_amount'])?> ریال</strong></div>
+        <small>آخرین تغییر: <?=htmlspecialchars(App\Support\PersianDate::format($draft['updated_at']?:$draft['created_at']))?></small>
+        <div class="pending-invoice-actions">
+          <form method="post"><input type="hidden" name="action" value="load_draft"><input type="hidden" name="draft_id" value="<?=htmlspecialchars((string)$draft['id'])?>"><button class="btn" type="submit">باز کردن فاکتور</button></form>
+          <form method="post" onsubmit="return confirm('این فاکتور در دست اقدام حذف شود؟');"><input type="hidden" name="action" value="delete_draft"><input type="hidden" name="draft_id" value="<?=htmlspecialchars((string)$draft['id'])?>"><button class="btn btn-danger" type="submit">حذف</button></form>
+        </div>
+      </article>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php else: ?>
+<section class="card pending-empty pending-invoices-bottom"><div><strong>فاکتور در دست اقدامی وجود ندارد</strong><small>برای شروع، از دکمه «فاکتور جدید» در پایین صفحه استفاده کنید.</small></div><form method="post"><input type="hidden" name="action" value="new_order"><button class="btn btn-primary" type="submit">＋ فاکتور جدید</button></form></section>
+<?php endif; ?>
 
 <script>
 (()=>{const input=document.getElementById('customer-live-search'),box=document.getElementById('customer-suggestions'),status=document.getElementById('customer-search-status');if(!input||!box)return;let timer;const normalize=s=>s.replace(/[يى]/g,'ی').replace(/ك/g,'ک');input.addEventListener('input',()=>{clearTimeout(timer);const q=normalize(input.value.trim());if(q.length<2){box.hidden=true;status.textContent='حداقل دو حرف یا رقم وارد کنید';return}status.textContent='در حال جستجو…';timer=setTimeout(()=>fetch('/api/v1/customers/search?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>{box.innerHTML='';if(!d.items.length){box.hidden=true;status.textContent='مشتری پیدا نشد';return}d.items.forEach(c=>{const a=document.createElement('button');a.type='button';a.className='customer-suggestion';a.innerHTML='<strong>'+c.name+'</strong><small>'+c.phone+(c.mobile?' · '+c.mobile:'')+'</small>';a.addEventListener('click',()=>location.href='/?page=orders&phone='+encodeURIComponent(c.phone));box.appendChild(a)});box.hidden=false;status.textContent=d.items.length+' مشتری پیدا شد'}).catch(()=>status.textContent='خطا در جستجو'),220)});document.addEventListener('click',e=>{if(!box.contains(e.target)&&e.target!==input)box.hidden=true})})();
