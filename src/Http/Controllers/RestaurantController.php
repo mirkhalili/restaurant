@@ -58,7 +58,7 @@ final class RestaurantController{
   if(!$draft){$s=$db->prepare("SELECT * FROM orders WHERE created_by=? AND status='draft' ORDER BY id DESC LIMIT 1");$s->execute([$userId]);$draft=$s->fetch();}if($draft)self::loadDraft($db,$draft);
  }
  private static function loadDraft(PDO $db,array $draft):void{
-  $_SESSION['order_draft_id']=(int)$draft['id'];$_SESSION['order_type']=$draft['order_type'];$_SESSION['order_discount_percent']=(float)$draft['discount_percent'];if(!empty($draft['customer_phone']))$_SESSION['order_customer_phone']=$draft['customer_phone'];$_SESSION['order_cart']=[];$s=$db->prepare('SELECT product_id,quantity FROM order_items WHERE order_id=?');$s->execute([(int)$draft['id']);foreach($s->fetchAll() as $it)$_SESSION['order_cart'][(int)$it['product_id']]=max(1,(int)$it['quantity']);
+  $_SESSION['order_draft_id']=(int)$draft['id'];$_SESSION['order_type']=$draft['order_type'];$_SESSION['order_discount_percent']=(float)$draft['discount_percent'];if(!empty($draft['customer_phone']))$_SESSION['order_customer_phone']=$draft['customer_phone'];$_SESSION['order_cart']=[];$s=$db->prepare('SELECT product_id,quantity FROM order_items WHERE order_id=?');$s->execute([(int)$draft['id']]);foreach($s->fetchAll() as $it)$_SESSION['order_cart'][(int)$it['product_id']]=max(1,(int)$it['quantity']);
  }
  private static function syncDraft(PDO $db,?array $customer):void{
   [$items,$subtotal]=self::cart($db);$percent=self::discountPercent();$discount=self::discountAmount($subtotal,$percent);$total=max(0,$subtotal-$discount);$userId=(int)(Auth::user()['id']??0);if($userId<1)return;$draftId=(int)($_SESSION['order_draft_id']??0);
