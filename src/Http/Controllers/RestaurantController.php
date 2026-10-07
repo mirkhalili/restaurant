@@ -12,7 +12,7 @@ final class RestaurantController{
    case'remove_customer_order':unset($_SESSION['order_customer_phone']);$customer=null;$phone='';$message='مشتری از سفارش حذف شد؛ اقلام سفارش حفظ شدند.';break;
    case'add_item':if(!$customer)throw new \RuntimeException('ابتدا مشتری را انتخاب کنید.');self::setSelectedProductType();self::addItem();break;
    case'remove_item':self::setSelectedProductType();self::decrementItem();break;
-   case'clear_cart':self::setSelectedProductType();self::clearCart();break;
+   case'clear_cart':self::setSelectedProductType();self::clearCart();self::setDiscount('0');break;
    case'set_order_type':$orderType=self::setOrderType($db);self::applyDefaultProducts($db,$orderType);$message='نوع سفارش تغییر کرد و اقلام قبلی حفظ شدند.';break;
    case'save_draft':self::setDiscount((string)($_POST['discount_percent']??'0'));$message='پیش‌فاکتور ذخیره شد.';break;
    case'finalize':self::setDiscount((string)($_POST['discount_percent']??'0'));$customerPhone=trim((string)($_POST['customer_phone']??$_SESSION['order_customer_phone']??''));$customer=self::customerSearch($db,$customerPhone);$result=self::finalize($db,$customer?:[]);header('Location: /?page=print&invoice='.rawurlencode($result['invoice_no']));exit;
