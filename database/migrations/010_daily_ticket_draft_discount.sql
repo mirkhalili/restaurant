@@ -22,4 +22,9 @@ CREATE TABLE daily_ticket_sequences (
   last_no INT UNSIGNED NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+INSERT INTO settings(scope,setting_key,setting_value) VALUES
+('print','kitchen_title','"آشپزخانه"'),
+('print','kitchen_show_date','"1"')
+ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value);
+
 SET FOREIGN_KEY_CHECKS=1;
