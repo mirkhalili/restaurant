@@ -3,17 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>چاپ فاکتور <?=htmlspecialchars($invoice['invoice_no'])?></title>
+<title>چاپ فیش <?=htmlspecialchars((string)($invoice['ticket_no']??$invoice['invoice_no']))?></title>
 <link rel="stylesheet" href="/assets/style.css">
 <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.3.0/qz-tray.js"></script>
+<style>
+.print-page{background:#f5f6f8}.print-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 18px}.print-toolbar>div{margin-left:auto;display:flex;flex-direction:column;gap:3px}.print-toolbar small{opacity:.7}
+.receipt{width:var(--receipt-width,80mm);margin:12px auto;background:#fff;padding:5mm;box-shadow:0 8px 30px rgba(0,0,0,.08)}.receipt h1{font-size:20px;margin:0}.receipt-line{display:flex;justify-content:space-between;gap:8px;margin:5px 0}.receipt-order-type{text-align:center;justify-content:center}.receipt-order-type strong{font-size:18px;border:1px solid #222;border-radius:7px;padding:4px 16px}.receipt-item{display:flex;justify-content:space-between;gap:8px;margin:6px 0}.receipt-item>div{display:flex;flex-direction:column}.receipt-item small{font-size:10px}.receipt-summary{margin-top:7px}.receipt-summary>div{display:flex;justify-content:space-between;margin:4px 0}.receipt-discount{font-weight:700}.receipt-total{display:flex;justify-content:space-between;font-size:15px;font-weight:800;border-top:1px dashed #555;padding-top:7px;margin-top:8px}.receipt footer{text-align:center;border-top:1px dashed #777;margin-top:10px;padding-top:7px;font-size:10px}
+.kitchen-slip{width:var(--receipt-width,80mm);margin:12px auto;background:#fff;padding:4mm;box-shadow:0 8px 30px rgba(0,0,0,.08);font-family:Vazirmatn,Tahoma,sans-serif;color:#111}.kitchen-header{display:grid;grid-template-columns:24% 52% 24%;align-items:center;border-bottom:2px solid #111;padding-bottom:6px}.kitchen-chef{text-align:center;font-size:25px}.kitchen-title{text-align:center;font-size:14px;font-weight:600;line-height:1.1}.kitchen-ticket{text-align:center;font-size:11px;font-weight:700}.kitchen-ticket b{display:block;font-size:25px;line-height:1.05;margin-top:2px}.kitchen-order-type{text-align:center;font-size:29px;font-weight:900;border:2px solid #111;border-radius:9px;padding:4px 12px;margin:7px auto;width:max-content;max-width:100%}.kitchen-meta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-size:10px;font-weight:700;margin-bottom:7px}.kitchen-table{width:100%;border-collapse:collapse;table-layout:fixed}.kitchen-table th,.kitchen-table td{border:1px solid #222;text-align:center;padding:5px 4px}.kitchen-table th{font-size:14px;font-weight:800}.kitchen-table th:nth-child(1),.kitchen-table td:nth-child(1){width:25%}.kitchen-table th:nth-child(2),.kitchen-table td:nth-child(2){width:55%}.kitchen-table th:nth-child(3),.kitchen-table td:nth-child(3){width:20%}.kitchen-group{font-size:16px;font-weight:900;vertical-align:middle;line-height:1.4}.kitchen-group-icon{display:block;font-size:23px;margin-bottom:2px}.kitchen-product{font-size:16px;font-weight:800;text-align:right!important;padding-right:8px!important}.kitchen-qty{font-size:23px;font-weight:900}.kitchen-date{text-align:center;font-size:10px;font-weight:700;margin:5px 0}.kitchen-footer{text-align:center;border-top:2px solid #111;margin-top:7px;padding-top:5px;font-size:9px;font-weight:700}
+@media print{body.print-page{background:#fff}.no-print{display:none!important}.receipt{margin:0;box-shadow:none}.kitchen-slip{margin:0;box-shadow:none}}
+</style>
 </head>
 <body class="print-page">
 <div class="print-toolbar no-print">
-  <div><strong>چاپ فاکتور</strong><small id="print-status">چاپ مستقیم مشتری و آشپزخانه با چاپگر پیش‌فرض</small></div>
-  <button type="button" class="btn btn-primary" id="direct-print-btn">چاپ فاکتور</button>
+  <div><strong>چاپ فیش</strong><small id="print-status">چاپ مستقیم فیش مشتری و آشپزخانه</small></div>
+  <button type="button" class="btn btn-primary" id="direct-print-btn">چاپ فیش</button>
   <button type="button" class="btn" id="browser-print-btn">پیش‌نمایش مرورگر</button>
   <a class="btn" href="/?page=invoice&id=<?=$invoice['id']?>">ویرایش فاکتور</a>
-  <a class="btn" href="/?page=orders">ثبت سفارش</a>
+  <a class="btn" href="/?page=orders">ثبت سفارش جدید</a>
 </div>
 
 <main class="receipt" id="customer-receipt" style="--receipt-width:<?=htmlspecialchars($settings['paper_width']??'80mm')?>">
@@ -24,89 +30,75 @@
     <?php if(($settings['show_phone']??'1')==='1' && !empty($restaurant['phone'])): ?><small><?=htmlspecialchars($restaurant['phone'])?></small><?php endif; ?>
   </header>
   <hr>
-  <div class="receipt-line"><span>فاکتور</span><b><?=htmlspecialchars($invoice['invoice_no'])?></b></div>
-  <div class="receipt-line"><span>تاریخ</span><span><?=htmlspecialchars(App\Support\PersianDate::format($invoice['created_at']))?></span></div>
-  <div class="receipt-line receipt-order-type"><span>سفارش</span><strong><?=($settings['kitchen_show_order_type']??'1')==='1'?htmlspecialchars($invoice['order_type']??'سالن'):''?></strong></div>
+  <div class="receipt-line"><span>شماره فیش</span><b><?=htmlspecialchars((string)($invoice['ticket_no']??'—'))?></b></div>
+  <div class="receipt-line"><span>تاریخ و ساعت</span><span><?=htmlspecialchars(AppSupportPersianDate::format($invoice['created_at']))?></span></div>
+  <div class="receipt-line receipt-order-type"><strong><?=htmlspecialchars($invoice['order_type']??'سالن')?></strong></div>
   <?php if(($settings['show_customer']??'1')==='1'): ?><div class="receipt-line"><span>مشتری</span><span><?=htmlspecialchars($invoice['customer_name'])?></span></div><?php endif; ?>
   <hr>
   <?php foreach($items as $it): ?>
     <div class="receipt-item"><div><b><?=htmlspecialchars($it['name'])?></b><small><?=number_format($it['unit_price'])?> × <?=htmlspecialchars((string)(int)$it['quantity'])?></small></div><strong><?=number_format($it['line_total'])?></strong></div>
   <?php endforeach; ?>
   <hr>
-  <div class="receipt-total"><span>مبلغ نهایی</span><strong><?=number_format($invoice['total_amount'])?> ریال</strong></div>
+  <div class="receipt-summary">
+    <div><span>جمع سفارش</span><strong><?=number_format((float)($invoice['subtotal_amount']??$invoice['total_amount']))?> ریال</strong></div>
+    <div class="receipt-discount"><span>تخفیف (<?=number_format((float)($invoice['discount_percent']??0),2)?>٪)</span><strong><?=number_format((float)($invoice['discount_amount']??0))?> ریال</strong></div>
+  </div>
+  <div class="receipt-total"><span>مبلغ نهایی</span><strong><?=number_format((float)$invoice['total_amount'])?> ریال</strong></div>
   <?php if(($settings['show_payment']??'1')==='1'): ?><div class="receipt-line"><span>پرداخت</span><span><?=htmlspecialchars(['cash'=>'نقدی','card'=>'کارتخوان','online'=>'آنلاین','mixed'=>'ترکیبی'][$invoice['payment_method']]??'—')?></span></div><?php endif; ?>
   <?php if(($settings['show_footer']??'1')==='1'): ?><footer><?=nl2br(htmlspecialchars($settings['footer_text']??''))?></footer><?php endif; ?>
 </main>
 
-<div id="kitchen-preview" class="kitchen-slip no-print">
-  <header><strong><?=htmlspecialchars($settings['kitchen_title']??'آشپزخانه کوچک')?></strong><div class="kitchen-order-type"><?=htmlspecialchars($invoice['order_type']??'سالن')?></div><small><?=($settings['kitchen_show_invoice_no']??'1')==='1'?htmlspecialchars($invoice['invoice_no']):''?></small></header>
-  <div id="kitchen-groups"></div>
-</div>
+<section class="kitchen-slip no-print" id="kitchen-preview" style="--receipt-width:<?=htmlspecialchars($settings['paper_width']??'80mm')?>">
+  <header class="kitchen-header">
+    <div class="kitchen-chef" aria-hidden="true">👨‍🍳</div>
+    <div class="kitchen-title">آشپزخانه</div>
+    <div class="kitchen-ticket">شماره فیش:<b><?=htmlspecialchars((string)($invoice['ticket_no']??'—'))?></b></div>
+  </header>
+  <div class="kitchen-order-type"><?=htmlspecialchars($invoice['order_type']??'سالن')?></div>
+  <div class="kitchen-meta">
+    <?php if(($settings['kitchen_show_customer']??'1')==='1'): ?><span>مشتری: <?=htmlspecialchars($invoice['customer_name'])?></span><?php endif; ?>
+    <?php if(($settings['kitchen_show_date']??'1')==='1'): ?><span>تاریخ و ساعت: <?=htmlspecialchars(AppSupportPersianDate::format($invoice['created_at']))?></span><?php endif; ?>
+  </div>
+  <table class="kitchen-table"><thead><tr><th>نوع سفارش</th><th>سفارش</th><th>تعداد</th></tr></thead><tbody id="kitchen-groups"></tbody></table>
+  <div class="kitchen-footer"><?=htmlspecialchars($settings['kitchen_footer']??'مخصوص آشپزخانه — بدون قیمت')?></div>
+</section>
 
 <script>
 const invoiceId=<?=json_encode((int)$invoice['id'])?>;
 const invoiceNo=<?=json_encode((string)$invoice['invoice_no'],JSON_UNESCAPED_UNICODE)?>;
+const ticketNo=<?=json_encode((string)($invoice['ticket_no']??''),JSON_UNESCAPED_UNICODE)?>;
 const restaurantName=<?=json_encode((string)($restaurant['name']??'رستوران'),JSON_UNESCAPED_UNICODE)?>;
 const orderType=<?=json_encode((string)($invoice['order_type']??'سالن'),JSON_UNESCAPED_UNICODE)?>;
 const customerName=<?=json_encode((string)($invoice['customer_name']??'مشتری'),JSON_UNESCAPED_UNICODE)?>;
-const createdAt=<?=json_encode(App\Support\PersianDate::format($invoice['created_at']),JSON_UNESCAPED_UNICODE)?>;
-const total=<?=json_encode(number_format((float)$invoice['total_amount']).' ریال',JSON_UNESCAPED_UNICODE)?>;
+const createdAt=<?=json_encode(AppSupportPersianDate::format($invoice['created_at']),JSON_UNESCAPED_UNICODE)?>;
+const subtotal=<?=json_encode((float)($invoice['subtotal_amount']??$invoice['total_amount']))?>;
+const discountPercent=<?=json_encode((float)($invoice['discount_percent']??0))?>;
+const discountAmount=<?=json_encode((float)($invoice['discount_amount']??0))?>;
+const total=<?=json_encode((float)$invoice['total_amount'])?>;
 const paymentMethod=<?=json_encode(['cash'=>'نقدی','card'=>'کارتخوان','online'=>'آنلاین','mixed'=>'ترکیبی'][$invoice['payment_method']]??'—',JSON_UNESCAPED_UNICODE)?>;
 const items=<?=json_encode($items,JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT)?>;
 const kitchenPrinterHint=<?=json_encode((string)($kitchenPrinters[0]['name']??''),JSON_UNESCAPED_UNICODE)?>;
 const paperWidth=<?=json_encode((string)($settings['paper_width']??'80mm'))?>;
-const kitchenSettings=<?=json_encode(['title'=>$settings['kitchen_title']??'آشپزخانه کوچک','show_restaurant'=>($settings['kitchen_show_restaurant']??'1')==='1','show_order_type'=>($settings['kitchen_show_order_type']??'1')==='1','show_customer'=>($settings['kitchen_show_customer']??'1')==='1','show_invoice_no'=>($settings['kitchen_show_invoice_no']??'1')==='1','show_date'=>($settings['kitchen_show_date']??'0')==='1','show_product_type'=>($settings['kitchen_show_product_type']??'1')==='1','footer'=>$settings['kitchen_footer']??'مخصوص آشپزخانه — بدون قیمت'],JSON_UNESCAPED_UNICODE)?>;
-
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
-function groups(){
-  const map=new Map();
-  items.forEach(it=>{const key=(it.product_type||'سایر').trim()||'سایر';if(!map.has(key))map.set(key,[]);map.get(key).push(it);});
-  return [...map.entries()];
-}
+function groups(){const map=new Map();items.forEach(it=>{const key=(it.product_type||'سایر').trim()||'سایر';if(!map.has(key))map.set(key,[]);map.get(key).push(it);});return [...map.entries()];}
+function kitchenRows(){return groups().map(([type,list])=>list.map((it,index)=>'<tr>'+ (index===0?'<td class="kitchen-group" rowspan="'+list.length+'"><span class="kitchen-group-icon">'+esc(it.category_icon||'•')+'</span>'+esc(type)+'</td>':'') +'<td class="kitchen-product">'+esc(it.name)+'</td><td class="kitchen-qty">'+Math.trunc(Number(it.quantity||0)).toLocaleString('fa-IR')+'</td></tr>').join('')).join('');}
 function kitchenHtml(){
-  const firstLine=esc(kitchenSettings.title||'آشپزخانه');
-  const secondLine=esc(orderType);
-  const meta=[];
-  if(kitchenSettings.show_invoice_no) meta.push('فاکتور: '+esc(invoiceNo));
-  if(kitchenSettings.show_customer) meta.push('مشتری: '+esc(customerName));
-  const dateLine=kitchenSettings.show_date?'<div class="kitchen-date">'+esc(createdAt)+'</div>':'';
-  const grouped=groups().map(([type,list])=>{
-    const title=kitchenSettings.show_product_type?'<div class="group-title">'+esc(list[0]?.category_icon||'•')+' '+esc(type)+'</div>':'';
-    return '<section class="group">'+title+list.map(it=>'<div class="item"><b>'+esc(it.name)+'</b><strong>'+Math.trunc(Number(it.quantity||0)).toLocaleString('fa-IR')+'</strong></div>').join('')+'</section>';
-  }).join('');
-  return '<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><style>@import url(https://fonts.googleapis.com/css2?family=Vazirmatn:wght@500;700;800);*{box-sizing:border-box}body{font-family:Vazirmatn,Tahoma,sans-serif;width:100%;margin:0;padding:3mm;color:#111;font-size:13px}header{text-align:center;border-bottom:2px solid #111;padding-bottom:6px;margin-bottom:7px}.kitchen-small-title{font-size:14px;font-weight:500;line-height:1.2}.kitchen-order-type{font-size:30px;font-weight:800;line-height:1.15;margin:3px 0 6px}.kitchen-meta{font-size:12px;font-weight:700;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.kitchen-date{font-size:13px;font-weight:800;margin-top:3px}.group{margin:0 0 9px}.group-title{font-size:18px;font-weight:800;border-top:1px dashed #555;border-bottom:1px dashed #555;padding:5px 0;margin-bottom:4px}.item{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:4px 0}.item b{font-size:17px}.item strong{font-size:22px;line-height:1}.footer{border-top:2px solid #111;margin-top:8px;padding-top:5px;text-align:center;font-size:11px}</style></head><body><header><div class="kitchen-small-title">'+firstLine+'</div><div class="kitchen-order-type">'+secondLine+'</div><div class="kitchen-meta">'+meta.join(' <span>│</span> ')+'</div>'+dateLine+'</header>'+grouped+'<div class="footer">'+esc(kitchenSettings.footer)+'</div></body></html>';
+ const rows=kitchenRows();
+ return '<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><style>@import url(https://fonts.googleapis.com/css2?family=Vazirmatn:wght@500;700;800);*{box-sizing:border-box}body{font-family:Vazirmatn,Tahoma,sans-serif;width:100%;margin:0;padding:3mm;color:#111;font-size:11px}.head{display:grid;grid-template-columns:24% 52% 24%;align-items:center;border-bottom:2px solid #111;padding-bottom:6px}.chef{text-align:center;font-size:24px}.title{text-align:center;font-size:14px;font-weight:600}.ticket{text-align:center;font-size:10px;font-weight:700}.ticket b{display:block;font-size:24px;line-height:1.05}.type{text-align:center;font-size:28px;font-weight:900;border:2px solid #111;border-radius:8px;padding:4px 10px;margin:7px auto;width:max-content}.meta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-size:9px;font-weight:700;margin-bottom:6px}.date{text-align:center;font-size:9px;font-weight:700;margin:3px 0}table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border:1px solid #222;text-align:center;padding:5px 3px}th{font-size:12px}th:nth-child(1),td:nth-child(1){width:25%}th:nth-child(2),td:nth-child(2){width:55%}th:nth-child(3),td:nth-child(3){width:20%}.group{font-size:14px;font-weight:800;vertical-align:middle}.groupicon{display:block;font-size:20px}.product{font-size:15px;font-weight:800;text-align:right}.qty{font-size:21px;font-weight:900}.foot{text-align:center;border-top:2px solid #111;margin-top:6px;padding-top:4px;font-size:8px;font-weight:700}</style></head><body><div class="head"><div class="chef">👨‍🍳</div><div class="title">آشپزخانه</div><div class="ticket">شماره فیش:<b>'+esc(ticketNo)+'</b></div></div><div class="type">'+esc(orderType)+'</div><div class="meta"><span>مشتری: '+esc(customerName)+'</span><span>تاریخ و ساعت: '+esc(createdAt)+'</span></div><table><thead><tr><th>نوع سفارش</th><th>سفارش</th><th>تعداد</th></tr></thead><tbody>'+rows+'</tbody></table><div class="foot">مخصوص آشپزخانه — بدون قیمت</div></body></html>';
 }
 function customerHtml(){
-  return '<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><style>@import url(https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800);*{box-sizing:border-box}body{font-family:Vazirmatn,Tahoma,sans-serif;width:100%;margin:0;padding:4mm;color:#111;font-size:11px}header{text-align:center}h1{font-size:18px;margin:0 0 3px}small{color:#555}.line{display:flex;justify-content:space-between;gap:8px;margin:4px 0}.type{text-align:center;font-size:17px;font-weight:800;border:1px solid #222;border-radius:6px;padding:5px;margin:6px 0}.item{display:flex;justify-content:space-between;gap:7px;margin:6px 0}.item div{display:flex;flex-direction:column}.item small{font-size:9px}.total{display:flex;justify-content:space-between;font-size:14px;font-weight:800;border-top:1px dashed #555;padding-top:7px;margin-top:8px}hr{border:0;border-top:1px dashed #777;margin:8px 0}footer{text-align:center;border-top:1px dashed #777;margin-top:9px;padding-top:6px;font-size:9px}</style></head><body><header><h1>'+esc(restaurantName)+'</h1><small>فاکتور '+esc(invoiceNo)+'</small></header><hr><div class="line"><span>تاریخ</span><span>'+esc(createdAt)+'</span></div><div class="type">'+esc(orderType)+'</div><div class="line"><span>مشتری</span><span>'+esc(customerName)+'</span></div><hr>'+items.map(it=>'<div class="item"><div><b>'+esc(it.name)+'</b><small>'+Number(it.unit_price||0).toLocaleString('fa-IR')+' × '+Math.trunc(Number(it.quantity||0)).toLocaleString('fa-IR')+'</small></div><strong>'+Math.round(Number(it.line_total||0)).toLocaleString('fa-IR')+'</strong></div>').join('')+'<hr><div class="total"><span>مبلغ نهایی</span><strong>'+esc(total)+'</strong></div><div class="line"><span>پرداخت</span><span>'+esc(paymentMethod)+'</span></div></body></html>';
+ return '<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><style>@import url(https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800);*{box-sizing:border-box}body{font-family:Vazirmatn,Tahoma,sans-serif;width:100%;margin:0;padding:4mm;color:#111;font-size:10px}header{text-align:center}h1{font-size:18px;margin:0 0 3px}.line{display:flex;justify-content:space-between;gap:8px;margin:4px 0}.type{text-align:center;font-size:17px;font-weight:800;border:1px solid #222;border-radius:6px;padding:5px;margin:6px 0}.item{display:flex;justify-content:space-between;gap:7px;margin:6px 0}.item div{display:flex;flex-direction:column}.item small{font-size:9px}.summary div{display:flex;justify-content:space-between;margin:4px 0}.discount{font-weight:700}.total{display:flex;justify-content:space-between;font-size:14px;font-weight:800;border-top:1px dashed #555;padding-top:7px;margin-top:8px}hr{border:0;border-top:1px dashed #777;margin:8px 0}footer{text-align:center;border-top:1px dashed #777;margin-top:9px;padding-top:6px;font-size:9px}</style></head><body><header><h1>'+esc(restaurantName)+'</h1></header><hr><div class="line"><b>شماره فیش</b><b>'+esc(ticketNo)+'</b></div><div class="line"><span>تاریخ و ساعت</span><span>'+esc(createdAt)+'</span></div><div class="type">'+esc(orderType)+'</div><div class="line"><span>مشتری</span><span>'+esc(customerName)+'</span></div><hr>'+items.map(it=>'<div class="item"><div><b>'+esc(it.name)+'</b><small>'+Number(it.unit_price||0).toLocaleString('fa-IR')+' × '+Math.trunc(Number(it.quantity||0)).toLocaleString('fa-IR')+'</small></div><strong>'+Math.round(Number(it.line_total||0)).toLocaleString('fa-IR')+'</strong></div>').join('')+'<hr><div class="summary"><div><span>جمع سفارش</span><strong>'+Math.round(subtotal).toLocaleString('fa-IR')+' ریال</strong></div><div class="discount"><span>تخفیف ('+discountPercent.toLocaleString('fa-IR')+'٪)</span><strong>'+Math.round(discountAmount).toLocaleString('fa-IR')+' ریال</strong></div></div><div class="total"><span>مبلغ نهایی</span><strong>'+Math.round(total).toLocaleString('fa-IR')+' ریال</strong></div><div class="line"><span>پرداخت</span><span>'+esc(paymentMethod)+'</span></div></body></html>';
 }
 function setStatus(v,error=false){const el=document.getElementById('print-status');el.textContent=v;el.classList.toggle('print-error',error);}
 async function markPrinted(printerId,kind){const fd=new FormData();fd.append('action','mark_printed');fd.append('invoice_id',String(invoiceId));fd.append('printer_id',String(printerId||0));fd.append('print_kind',kind);try{await fetch('/?page=print&invoice='+encodeURIComponent(invoiceNo),{method:'POST',body:fd,credentials:'same-origin'});}catch(e){}}
-async function resolvePrinter(hint){
-  if(hint){const found=await qz.printers.find(hint);if(found)return found;}
-  return qz.printers.getDefault();
-}
+async function resolvePrinter(hint){if(hint){const found=await qz.printers.find(hint);if(found)return found;}return qz.printers.getDefault();}
 async function directPrint(){
-  if(typeof qz==='undefined'){setStatus('QZ Tray نصب یا در حال اجرا نیست؛ چاپ مستقیم فعال نمی‌شود.',true);return;}
-  const btn=document.getElementById('direct-print-btn');btn.disabled=true;setStatus('در حال اتصال به سرویس چاپ…');
-  try{
-    if(!qz.websocket.isActive()) await qz.websocket.connect({retries:3,delay:1});
-    const customerPrinter=await qz.printers.getDefault();
-    if(!customerPrinter) throw new Error('چاپگر پیش‌فرض سیستم پیدا نشد.');
-    const kitchenPrinter=await resolvePrinter(kitchenPrinterHint);
-    const cfgCustomer=qz.configs.create(customerPrinter,{margins:0,scaleContent:true,jobName:'فاکتور '+invoiceNo});
-    const cfgKitchen=qz.configs.create(kitchenPrinter,{margins:0,scaleContent:true,jobName:'آشپزخانه '+invoiceNo});
-    const customerData=[{type:'pixel',format:'html',flavor:'plain',data:customerHtml()}];
-    const kitchenData=[{type:'pixel',format:'html',flavor:'plain',data:kitchenHtml()}];
-    setStatus('در حال چاپ فاکتور مشتری…');await qz.print(cfgCustomer,customerData);await markPrinted(0,'customer');
-    setStatus('در حال چاپ فیش آشپزخانه…');await qz.print(cfgKitchen,kitchenData);await markPrinted(0,'kitchen');
-    setStatus('هر دو چاپ با موفقیت ارسال شد.');
-  }catch(e){setStatus('چاپ مستقیم انجام نشد: '+(e?.message||e),true);}
-  finally{btn.disabled=false;}
+ if(typeof qz==='undefined'){setStatus('QZ Tray نصب یا در حال اجرا نیست؛ چاپ مستقیم فعال نمی‌شود.',true);return;}
+ const btn=document.getElementById('direct-print-btn');btn.disabled=true;setStatus('در حال اتصال به سرویس چاپ…');
+ try{if(!qz.websocket.isActive())await qz.websocket.connect({retries:3,delay:1});const customerPrinter=await qz.printers.getDefault();if(!customerPrinter)throw new Error('چاپگر پیش‌فرض سیستم پیدا نشد.');const kitchenPrinter=await resolvePrinter(kitchenPrinterHint);const cfgCustomer=qz.configs.create(customerPrinter,{margins:0,scaleContent:true,jobName:'فیش '+ticketNo});const cfgKitchen=qz.configs.create(kitchenPrinter,{margins:0,scaleContent:true,jobName:'آشپزخانه '+ticketNo});setStatus('در حال چاپ فیش مشتری…');await qz.print(cfgCustomer,[{type:'pixel',format:'html',flavor:'plain',data:customerHtml()}]);await markPrinted(0,'customer');setStatus('در حال چاپ فیش آشپزخانه…');await qz.print(cfgKitchen,[{type:'pixel',format:'html',flavor:'plain',data:kitchenHtml()}]);await markPrinted(0,'kitchen');setStatus('هر دو فیش با موفقیت ارسال شد.');}catch(e){setStatus('چاپ مستقیم انجام نشد: '+(e?.message||e),true);}finally{btn.disabled=false;}
 }
-document.getElementById('direct-print-btn').addEventListener('click',directPrint);
-document.getElementById('browser-print-btn').addEventListener('click',()=>window.print());
-
-const kg=document.getElementById('kitchen-groups');
-kg.innerHTML=groups().map(([type,list])=>'<section><strong>'+esc(list[0]?.category_icon||'•')+' '+esc(type)+'</strong>'+list.map(it=>'<div><span>'+esc(it.name)+'</span><b>'+Math.trunc(Number(it.quantity||0)).toLocaleString('fa-IR')+'</b></div>').join('')+'</section>').join('');
+document.getElementById('direct-print-btn').addEventListener('click',directPrint);document.getElementById('browser-print-btn').addEventListener('click',()=>window.print());
+document.getElementById('kitchen-groups').innerHTML=kitchenRows();
 </script>
-</body></html>
+</body>
+</html>
