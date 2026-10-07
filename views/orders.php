@@ -70,7 +70,7 @@
 
 <aside class="card invoice-card">
   <div class="invoice-top">
-    <div><span>پیش‌فاکتور</span><strong>جدید</strong></div>
+    <div><span>پیش‌فاکتور</span><strong><?=!empty($_SESSION['order_draft_id'])?'ذخیره‌شده':'جدید'?></strong></div>
     <div class="invoice-date"><?=htmlspecialchars(App\Support\PersianDate::today())?></div>
   </div>
 
@@ -98,18 +98,28 @@
     <?php if(!$items): ?>
       <div class="empty compact"><strong>فاکتور خالی است</strong><span>از لیست محصولات انتخاب کنید.</span></div>
     <?php else: foreach($items as $it): ?>
-      <div class="invoice-item">
+      <div class="invoice-item" role="button" tabindex="0" title="برای کم کردن یک عدد کلیک کنید" onclick="if(!event.target.closest('form'))this.querySelector('form').submit()" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('form')){event.preventDefault();this.querySelector('form').submit()}">
         <div><strong><?=htmlspecialchars($it['name'])?></strong><small><?=number_format((float)$it['price'])?> × <?=$it['qty']?></small></div>
         <b><?=number_format((float)$it['line_total'])?></b>
-        <form method="post"><input type="hidden" name="action" value="remove_item"><input type="hidden" name="product_id" value="<?=$it['id']?>"><button aria-label="حذف">×</button></form>
+        <form method="post"><input type="hidden" name="action" value="remove_item"><input type="hidden" name="product_id" value="<?=$it['id']?>"><button aria-label="کم کردن یک عدد" title="کم کردن یک عدد">−</button></form>
       </div>
     <?php endforeach; endif; ?>
   </div>
 
+  <div class="invoice-summary">
+    <div><span>جمع سفارش</span><strong><?=number_format((float)$subtotal)?> <small>ریال</small></strong></div>
+    <form method="post" class="discount-form">
+      <input type="hidden" name="action" value="save_draft">
+      <label>درصد تخفیف <input id="discount-percent" class="field" type="number" min="0" max="100" step="0.01" name="discount_percent" value="<?=htmlspecialchars((string)$discountPercent)?>"> <small>%</small></label>
+      <button class="btn" type="submit">ذخیره پیش‌فاکتور</button>
+    </form>
+    <div class="discount-row"><span>تخفیف (<?=htmlspecialchars((string)$discountPercent)?>٪)</span><strong><?=number_format((float)$discountAmount)?> <small>ریال</small></strong></div>
+  </div>
   <div class="invoice-total"><span>مبلغ نهایی</span><strong><?=number_format((float)$total)?> <small>ریال</small></strong></div>
-  <form method="post" class="finalize-form">
+  <form method="post" class="finalize-form" onsubmit="document.getElementById('final-discount-percent').value=document.getElementById('discount-percent').value">
     <input type="hidden" name="action" value="finalize">
     <input type="hidden" name="customer_phone" value="<?=htmlspecialchars($customer['phone']??'')?>">
+    <input type="hidden" id="final-discount-percent" name="discount_percent" value="<?=htmlspecialchars((string)$discountPercent)?>">
     <label>شیوه پرداخت<select name="payment_method"><option value="cash">نقدی</option><option value="card">کارتخوان</option><option value="online">آنلاین</option><option value="mixed">ترکیبی</option></select></label>
     <button class="btn btn-primary finalize-btn" <?=(!$customer||!$items)?'disabled':''?>>پرداخت و ادامه به چاپ فیش</button>
   </form>
