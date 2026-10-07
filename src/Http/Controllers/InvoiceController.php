@@ -72,7 +72,7 @@ final class InvoiceController
         $db->beginTransaction();
         try {
             $before=['invoice_id'=>$invoiceId,'total_amount'=>$invoice['total_amount'],'payment_method'=>$invoice['payment_method']];
-            $total=0;
+            $subtotal=0;
             $q=$db->prepare('SELECT id,quantity,unit_price FROM order_items WHERE order_id=?');
             $q->execute([(int)$invoice['order_id']]);
             $existing=$q->fetchAll();
@@ -82,7 +82,7 @@ final class InvoiceController
             foreach($existing as $it){
                 $id=(int)$it['id'];$qty=(int)($submitted[$id]??0);
                 if($qty<=0){$del->execute([$id]);continue;}
-                $line=$qty*(float)$it['unit_price'];$upd->execute([$qty,$line,$id]);$total+=$line;
+                $line=$qty*(float)$it['unit_price'];$upd->execute([$qty,$line,$id]);$subtotal+=$line;
             }
             $newProduct=(int)($_POST['new_product_id']??0);$newQty=(int)($_POST['new_quantity']??0);
             if($newProduct>0&&$newQty>0){
@@ -90,14 +90,15 @@ final class InvoiceController
                 if(!$product) throw new \RuntimeException('محصول جدید معتبر نیست.');
                 $line=$newQty*(float)$product['price'];
                 $ins=$db->prepare('INSERT INTO order_items(order_id,product_id,quantity,unit_price,line_total,created_at) VALUES(?,?,?,?,?,NOW())');
-                $ins->execute([(int)$invoice['order_id'],$newProduct,$newQty,$product['price'],$line]);$total+=$line;
+                $ins->execute([(int)$invoice['order_id'],$newProduct,$newQty,$product['price'],$line]);$subtotal+=$line;
             }
             $method=$_POST['payment_method']??$invoice['payment_method'];
             if(!in_array($method,['cash','card','online','mixed'],true)) throw new \RuntimeException('شیوه پرداخت نامعتبر است.');
-            $db->prepare('UPDATE orders SET total_amount=?,paid_amount=?,payment_method=?,updated_at=NOW() WHERE id=?')->execute([$total,$total,$method,(int)$invoice['order_id']]);
-            $db->prepare('UPDATE invoices SET total_amount=? WHERE id=?')->execute([$total,$invoiceId]);
+            $discountPercent=max(0,min(100,(float)($invoice['discount_percent']??0)));$discountAmount=round($subtotal*$discountPercent/100,2);$total=max(0,$subtotal-$discountAmount);
+            $db->prepare('UPDATE orders SET subtotal_amount=?,discount_percent=?,discount_amount=?,total_amount=?,paid_amount=?,payment_method=?,updated_at=NOW() WHERE id=?')->execute([$subtotal,$discountPercent,$discountAmount,$total,$total,$method,(int)$invoice['order_id']]);
+            $db->prepare('UPDATE invoices SET total_amount=?,discount_amount=? WHERE id=?')->execute([$total,$discountAmount,$invoiceId]);
             $db->prepare('UPDATE payments SET method=?,amount=? WHERE invoice_id=?')->execute([$method,$total,$invoiceId]);
-            AuditLogger::log($db,'ویرایش فاکتور','invoice',$invoiceId,$before,['total_amount'=>$total,'payment_method'=>$method]);
+            AuditLogger::log($db,'ویرایش فاکتور','invoice',$invoiceId,$before,['subtotal_amount'=>$subtotal,'discount_percent'=>$discountPercent,'discount_amount'=>$discountAmount,'total_amount'=>$total,'payment_method'=>$method]);
             $db->commit();
         } catch(\Throwable $e){$db->rollBack();throw $e;}
     }
