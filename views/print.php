@@ -56,10 +56,8 @@
     <div class="kitchen-ticket">شماره فیش:<b><?=htmlspecialchars((string)($invoice['ticket_no']??'—'))?></b></div>
   </header>
   <div class="kitchen-order-type"><?=htmlspecialchars($invoice['order_type']??'سالن')?></div>
-  <div class="kitchen-meta">
-    <?php if(($settings['kitchen_show_customer']??'1')==='1'): ?><span>مشتری: <?=htmlspecialchars($invoice['customer_name'])?></span><?php endif; ?>
-    <?php if(($settings['kitchen_show_date']??'1')==='1'): ?><span>تاریخ و ساعت: <?=htmlspecialchars(App\Support\PersianDate::format($invoice['created_at']))?></span><?php endif; ?>
-  </div>
+  <div class="kitchen-meta"><?php if(($settings['kitchen_show_customer']??'1')==='1'): ?><span>مشتری: <?=htmlspecialchars($invoice['customer_name'])?></span><?php endif; ?></div>
+  <?php if(($settings['kitchen_show_date']??'1')==='1'): ?><div class="kitchen-date">تاریخ و ساعت: <?=htmlspecialchars(App\Support\PersianDate::format($invoice['created_at']))?></div><?php endif; ?>
   <table class="kitchen-table"><thead><tr><th>نوع سفارش</th><th>سفارش</th><th>تعداد</th></tr></thead><tbody id="kitchen-groups"></tbody></table>
   <div class="kitchen-footer"><?=htmlspecialchars($settings['kitchen_footer']??'مخصوص آشپزخانه — بدون قیمت')?></div>
 </section>
