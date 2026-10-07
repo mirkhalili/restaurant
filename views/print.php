@@ -31,7 +31,7 @@
   </header>
   <hr>
   <div class="receipt-line"><span>شماره فیش</span><b><?=htmlspecialchars((string)($invoice['ticket_no']??'—'))?></b></div>
-  <div class="receipt-line"><span>تاریخ و ساعت</span><span><?=htmlspecialchars(AppSupportPersianDate::format($invoice['created_at']))?></span></div>
+  <div class="receipt-line"><span>تاریخ و ساعت</span><span><?=htmlspecialchars(App\Support\PersianDate::format($invoice['created_at']))?></span></div>
   <div class="receipt-line receipt-order-type"><strong><?=htmlspecialchars($invoice['order_type']??'سالن')?></strong></div>
   <?php if(($settings['show_customer']??'1')==='1'): ?><div class="receipt-line"><span>مشتری</span><span><?=htmlspecialchars($invoice['customer_name'])?></span></div><?php endif; ?>
   <hr>
@@ -57,7 +57,7 @@
   <div class="kitchen-order-type"><?=htmlspecialchars($invoice['order_type']??'سالن')?></div>
   <div class="kitchen-meta">
     <?php if(($settings['kitchen_show_customer']??'1')==='1'): ?><span>مشتری: <?=htmlspecialchars($invoice['customer_name'])?></span><?php endif; ?>
-    <?php if(($settings['kitchen_show_date']??'1')==='1'): ?><span>تاریخ و ساعت: <?=htmlspecialchars(AppSupportPersianDate::format($invoice['created_at']))?></span><?php endif; ?>
+    <?php if(($settings['kitchen_show_date']??'1')==='1'): ?><span>تاریخ و ساعت: <?=htmlspecialchars(App\Support\PersianDate::format($invoice['created_at']))?></span><?php endif; ?>
   </div>
   <table class="kitchen-table"><thead><tr><th>نوع سفارش</th><th>سفارش</th><th>تعداد</th></tr></thead><tbody id="kitchen-groups"></tbody></table>
   <div class="kitchen-footer"><?=htmlspecialchars($settings['kitchen_footer']??'مخصوص آشپزخانه — بدون قیمت')?></div>
@@ -70,7 +70,7 @@ const ticketNo=<?=json_encode((string)($invoice['ticket_no']??''),JSON_UNESCAPED
 const restaurantName=<?=json_encode((string)($restaurant['name']??'رستوران'),JSON_UNESCAPED_UNICODE)?>;
 const orderType=<?=json_encode((string)($invoice['order_type']??'سالن'),JSON_UNESCAPED_UNICODE)?>;
 const customerName=<?=json_encode((string)($invoice['customer_name']??'مشتری'),JSON_UNESCAPED_UNICODE)?>;
-const createdAt=<?=json_encode(AppSupportPersianDate::format($invoice['created_at']),JSON_UNESCAPED_UNICODE)?>;
+const createdAt=<?=json_encode(App\Support\PersianDate::format($invoice['created_at']),JSON_UNESCAPED_UNICODE)?>;
 const subtotal=<?=json_encode((float)($invoice['subtotal_amount']??$invoice['total_amount']))?>;
 const discountPercent=<?=json_encode((float)($invoice['discount_percent']??0))?>;
 const discountAmount=<?=json_encode((float)($invoice['discount_amount']??0))?>;

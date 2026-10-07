@@ -1,6 +1,26 @@
 <section class="page-head"><div><div class="eyebrow">POS / فروش</div><h1>ثبت سفارش و صدور فاکتور</h1><p>مشتری را انتخاب کنید، سپس محصولات را به پیش‌فاکتور اضافه کنید.</p></div></section>
 <?php if(!empty($message)): ?><div class="alert success"><?=htmlspecialchars($message)?></div><?php endif; ?>
 <?php if(!empty($error)): ?><div class="alert"><?=htmlspecialchars($error)?></div><?php endif; ?>
+<?php if(!empty($pendingDrafts)): ?>
+<section class="card pending-invoices">
+  <div class="card-head">
+    <div><h2>فاکتورهای در دست اقدام</h2><small>فاکتورهای ذخیره‌شده تا زمان نهایی‌شدن باقی می‌مانند.</small></div>
+    <form method="post"><input type="hidden" name="action" value="new_order"><button class="btn btn-primary" type="submit">＋ فاکتور جدید</button></form>
+  </div>
+  <div class="pending-invoice-grid">
+    <?php foreach($pendingDrafts as $draft): ?>
+      <article class="pending-invoice">
+        <div class="pending-invoice-head"><strong><?=htmlspecialchars($draft['customer_name'])?></strong><span><?=htmlspecialchars($draft['order_type'])?></span></div>
+        <div class="pending-invoice-meta"><span><?=htmlspecialchars((string)$draft['item_count'])?> قلم</span><span>تخفیف <?=number_format((float)$draft['discount_percent'],2)?>٪</span><strong><?=number_format((float)$draft['total_amount'])?> ریال</strong></div>
+        <small>آخرین تغییر: <?=htmlspecialchars(App\Support\PersianDate::format($draft['updated_at']?:$draft['created_at']))?></small>
+        <form method="post"><input type="hidden" name="action" value="load_draft"><input type="hidden" name="draft_id" value="<?=htmlspecialchars((string)$draft['id'])?>"><button class="btn" type="submit">باز کردن فاکتور</button></form>
+      </article>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php else: ?>
+<section class="card pending-empty"><div><strong>فاکتور در دست اقدامی وجود ندارد</strong><small>برای شروع، یک فاکتور جدید ایجاد کنید.</small></div><form method="post"><input type="hidden" name="action" value="new_order"><button class="btn btn-primary" type="submit">＋ فاکتور جدید</button></form></section>
+<?php endif; ?>
 
 <div class="pos-grid">
 <section class="card pos-main">
@@ -109,13 +129,18 @@
   <div class="invoice-summary">
     <div><span>جمع سفارش</span><strong><?=number_format((float)$subtotal)?> <small>ریال</small></strong></div>
     <form method="post" class="discount-form">
-      <input type="hidden" name="action" value="save_draft">
+      <input type="hidden" name="action" value="apply_discount">
       <label>درصد تخفیف <input id="discount-percent" class="field" type="number" min="0" max="100" step="0.01" name="discount_percent" value="<?=htmlspecialchars((string)$discountPercent)?>"> <small>%</small></label>
-      <button class="btn" type="submit">ذخیره پیش‌فاکتور</button>
+      <button class="btn" type="submit">اعمال</button>
     </form>
     <div class="discount-row"><span>تخفیف (<?=htmlspecialchars((string)$discountPercent)?>٪)</span><strong><?=number_format((float)$discountAmount)?> <small>ریال</small></strong></div>
   </div>
   <div class="invoice-total"><span>مبلغ نهایی</span><strong><?=number_format((float)$total)?> <small>ریال</small></strong></div>
+  <form method="post" class="save-draft-bottom">
+    <input type="hidden" name="action" value="save_draft">
+    <input type="hidden" id="save-draft-discount" name="discount_percent" value="<?=htmlspecialchars((string)$discountPercent)?>">
+    <button class="btn btn-primary save-draft-btn" type="submit" <?=!$items?'disabled':''?>>ذخیره فاکتور</button>
+  </form>
   <form method="post" class="finalize-form" onsubmit="document.getElementById('final-discount-percent').value=document.getElementById('discount-percent').value">
     <input type="hidden" name="action" value="finalize">
     <input type="hidden" name="customer_phone" value="<?=htmlspecialchars($customer['phone']??'')?>">
@@ -123,11 +148,12 @@
     <label>شیوه پرداخت<select name="payment_method"><option value="cash">نقدی</option><option value="card">کارتخوان</option><option value="online">آنلاین</option><option value="mixed">ترکیبی</option></select></label>
     <button class="btn btn-primary finalize-btn" <?=(!$customer||!$items)?'disabled':''?>>پرداخت و ادامه به چاپ فیش</button>
   </form>
-  <form method="post"><input type="hidden" name="action" value="clear_cart"><button class="btn clear-btn" <?=!$items?'disabled':''?>>خالی کردن فاکتور</button></form>
+  <form method="post"><input type="hidden" name="action" value="new_order"><button class="btn clear-btn" type="submit">فاکتور جدید</button></form>
 </aside>
 </div>
 
 <script>
 (()=>{const input=document.getElementById('customer-live-search'),box=document.getElementById('customer-suggestions'),status=document.getElementById('customer-search-status');if(!input||!box)return;let timer;const normalize=s=>s.replace(/[يى]/g,'ی').replace(/ك/g,'ک');input.addEventListener('input',()=>{clearTimeout(timer);const q=normalize(input.value.trim());if(q.length<2){box.hidden=true;status.textContent='حداقل دو حرف یا رقم وارد کنید';return}status.textContent='در حال جستجو…';timer=setTimeout(()=>fetch('/api/v1/customers/search?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>{box.innerHTML='';if(!d.items.length){box.hidden=true;status.textContent='مشتری پیدا نشد';return}d.items.forEach(c=>{const a=document.createElement('button');a.type='button';a.className='customer-suggestion';a.innerHTML='<strong>'+c.name+'</strong><small>'+c.phone+(c.mobile?' · '+c.mobile:'')+'</small>';a.addEventListener('click',()=>location.href='/?page=orders&phone='+encodeURIComponent(c.phone));box.appendChild(a)});box.hidden=false;status.textContent=d.items.length+' مشتری پیدا شد'}).catch(()=>status.textContent='خطا در جستجو'),220)});document.addEventListener('click',e=>{if(!box.contains(e.target)&&e.target!==input)box.hidden=true})})();
 const search=document.querySelector('[data-product-search]');let selectedType=<?=json_encode((string)($selectedType??'all'),JSON_UNESCAPED_UNICODE)?>;function filterProducts(){const q=(search?.value||'').trim().toLowerCase();document.querySelectorAll('[data-product]').forEach(x=>{const okType=selectedType==='all'||x.dataset.type===selectedType;const okSearch=!q||x.textContent.toLowerCase().includes(q);x.hidden=!(okType&&okSearch);});}search?.addEventListener('input',filterProducts);document.querySelectorAll('[data-type-filters] .type-filter').forEach(b=>b.addEventListener('click',()=>{selectedType=b.dataset.type;document.querySelectorAll('input[name="selected_type"]').forEach(x=>x.value=selectedType);document.querySelectorAll('[data-type-filters] .type-filter').forEach(x=>x.classList.toggle('active',x===b));filterProducts();}));filterProducts();
+const discountInput=document.getElementById('discount-percent');const saveDraftDiscount=document.getElementById('save-draft-discount');discountInput?.addEventListener('input',()=>{if(saveDraftDiscount)saveDraftDiscount.value=discountInput.value;});
 </script>
