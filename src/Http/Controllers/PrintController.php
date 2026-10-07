@@ -11,7 +11,7 @@ final class PrintController
     public static function receipt(PDO $db): array
     {
         $invoiceNo=trim((string)($_GET['invoice']??''));
-        $s=$db->prepare("SELECT i.*,o.order_no,o.customer_phone,o.payment_method,o.created_at,
+        $s=$db->prepare("SELECT i.*,o.order_no,o.customer_phone,o.payment_method,o.order_type,o.created_at,
                                 COALESCE(c.name,o.customer_phone,'مشتری') customer_name
                          FROM invoices i JOIN orders o ON o.id=i.order_id
                          LEFT JOIN customers c ON c.id=o.customer_id WHERE i.invoice_no=? LIMIT 1");
@@ -36,7 +36,7 @@ final class PrintController
 
     public static function settings(PDO $db): array
     {
-        $defaults=['paper_width'=>'80mm','show_logo'=>'1','show_address'=>'1','show_phone'=>'1','show_customer'=>'1','show_invoice_no'=>'1','show_date'=>'1','show_payment'=>'1','show_footer'=>'1','footer_text'=>'از خرید شما سپاسگزاریم','feed'=>'3','cut'=>'1','kitchen_title'=>'آشپزخانه کوچک','kitchen_show_restaurant'=>'1','kitchen_show_order_type'=>'1','kitchen_show_customer'=>'1','kitchen_show_invoice_no'=>'1','kitchen_show_date'=>'0','kitchen_show_product_type'=>'1','kitchen_footer'=>'مخصوص آشپزخانه — بدون قیمت'];
+        $defaults=['paper_width'=>'80mm','show_logo'=>'1','show_address'=>'1','show_phone'=>'1','show_customer'=>'1','show_invoice_no'=>'1','show_date'=>'1','show_payment'=>'1','show_footer'=>'1','footer_text'=>'از خرید شما سپاسگزاریم','feed'=>'3','cut'=>'1','kitchen_title'=>'آشپزخانه','kitchen_show_restaurant'=>'1','kitchen_show_order_type'=>'1','kitchen_show_customer'=>'1','kitchen_show_invoice_no'=>'1','kitchen_show_date'=>'1','kitchen_show_product_type'=>'1','kitchen_footer'=>'مخصوص آشپزخانه — بدون قیمت'];
         $rows=$db->query("SELECT setting_key,setting_value FROM settings WHERE scope='print'")->fetchAll();
         foreach($rows as $r){$v=json_decode((string)$r['setting_value'],true);$defaults[$r['setting_key']]=is_string($v)||is_numeric($v)?(string)$v:$v;}
         return $defaults;
