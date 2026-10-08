@@ -13,7 +13,7 @@ final class RestaurantController{
    case'add_item':if(!$customer)throw new \RuntimeException('ابتدا مشتری را انتخاب کنید.');self::setSelectedProductType();self::addItem($db);break;
    case'remove_item':self::setSelectedProductType();self::decrementItem();break;
    case'clear_cart':self::setSelectedProductType();self::clearCart();self::setDiscount('0');self::forgetActiveDraft();$message='فاکتور فعلی خالی شد.';break;
-   case'new_order':self::forgetActiveDraft();$customer=null;$phone='';$orderType=self::orderType($db);$message='فاکتور جدید آماده شد.';break;
+   case'new_order':self::forgetActiveDraft();$customer=null;$phone='';$orderType=self::orderType($db);self::applyDefaultProducts($db,$orderType);$message='فاکتور جدید آماده شد و اقلام پیش‌فرض نوع سفارش اضافه شدند.';break;
    case'load_draft':$draftId=(int)($_POST['draft_id']??0);if($draftId<1)throw new \RuntimeException('فاکتور در دست اقدام نامعتبر است.');$draft=self::findDraft($db,$draftId);if(!$draft)throw new \RuntimeException('فاکتور در دست اقدام پیدا نشد.');self::loadDraft($db,$draft);$orderType=$draft['order_type'];$message='فاکتور در دست اقدام بارگذاری شد.';break;
    case'delete_draft':$draftId=(int)($_POST['draft_id']??0);self::deleteDraft($db,$draftId);$message='فاکتور در دست اقدام حذف شد.';break;
    case'set_order_type':$orderType=self::setOrderType($db);self::applyDefaultProducts($db,$orderType);$message='نوع سفارش تغییر کرد و اقلام قبلی حفظ شدند.';break;
