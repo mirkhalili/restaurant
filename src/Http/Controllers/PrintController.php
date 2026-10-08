@@ -36,7 +36,7 @@ final class PrintController
 
     public static function settings(PDO $db): array
     {
-        $defaults=['paper_width'=>'80mm','show_logo'=>'1','show_address'=>'1','show_phone'=>'1','show_customer'=>'1','show_invoice_no'=>'1','show_date'=>'1','show_payment'=>'1','show_footer'=>'1','footer_text'=>'از خرید شما سپاسگزاریم','feed'=>'3','cut'=>'1','kitchen_title'=>'آشپزخانه','kitchen_show_restaurant'=>'1','kitchen_show_order_type'=>'1','kitchen_show_customer'=>'1','kitchen_show_invoice_no'=>'1','kitchen_show_date'=>'1','kitchen_show_product_type'=>'1','kitchen_footer'=>'مخصوص آشپزخانه — بدون قیمت'];
+        $defaults=['paper_width'=>'80mm','show_logo'=>'1','show_address'=>'1','show_phone'=>'1','show_customer'=>'1','show_invoice_no'=>'1','show_date'=>'1','show_payment'=>'1','show_footer'=>'1','footer_text'=>'از خرید شما سپاسگزاریم','feed'=>'3','cut'=>'1','kitchen_title'=>'آشپزخانه','kitchen_show_restaurant'=>'1','kitchen_show_order_type'=>'1','kitchen_show_customer'=>'1','kitchen_show_invoice_no'=>'1','kitchen_show_date'=>'1' ,'kitchen_show_product_type'=>'1'];
         $rows=$db->query("SELECT setting_key,setting_value FROM settings WHERE scope='print'")->fetchAll();
         foreach($rows as $r){$v=json_decode((string)$r['setting_value'],true);$defaults[$r['setting_key']]=is_string($v)||is_numeric($v)?(string)$v:$v;}
         return $defaults;
